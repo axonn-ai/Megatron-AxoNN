@@ -140,7 +140,6 @@ class ParallelMLP(MegatronModule):
         # [s, b, h]
         output, output_bias = self.dense_4h_to_h(intermediate_parallel)
         output, output_bias = gather(output), gather(output_bias)
-    
         return output, output_bias
 
 
