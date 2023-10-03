@@ -91,7 +91,8 @@ class ParallelMLP(MegatronModule):
         self.dense_h_to_4h = Tensor_Parallel_Linear(
                     in_features=config.hidden_size,
                     out_features=ffn_hidden_size,
-                    skip_bias_add=True
+                    skip_bias_add=True,
+                    init_method=config.init_method
                 )
 
         self.bias_gelu_fusion = False
@@ -119,7 +120,9 @@ class ParallelMLP(MegatronModule):
         self.dense_4h_to_h = Tensor_Parallel_Linear(
             in_features=config.ffn_hidden_size,
             out_features=config.hidden_size,
-            skip_bias_add=True 
+            skip_bias_add=True,
+            init_method=config.init_method,
+            transpose=True
         )
 
     def forward(self, hidden_states):
