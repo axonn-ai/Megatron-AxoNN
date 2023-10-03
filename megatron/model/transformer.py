@@ -87,6 +87,7 @@ class ParallelMLP(MegatronModule):
         if config.gated_linear_unit:
             ffn_hidden_size *= 2
 
+        # Project to 4h. If using swiglu double the output width, see https://arxiv.org/pdf/2002.05202.pdf
         self.dense_h_to_4h = Tensor_Parallel_Linear(
                     in_features=config.hidden_size,
                     out_features=ffn_hidden_size,
@@ -114,6 +115,7 @@ class ParallelMLP(MegatronModule):
             self.bias_gelu_fusion = args.bias_gelu_fusion
             self.activation_func = F.gelu
 
+        # Project back to h.
         self.dense_4h_to_h = Tensor_Parallel_Linear(
             in_features=config.ffn_hidden_size,
             out_features=config.hidden_size,
