@@ -1,12 +1,20 @@
-This repository integrates AxoNN's 2D tensor parallelism within Megatron-LM. Instructions to run this repository are as follows:
+This repository integrates AxoNN's 2D tensor parallelism within Megatron-LM. The general workflow to quickly get up and running is as follows:
 
- Install AxoNN
+1.  Install AxoNN
 ```
 git clone git@github.com:axonn-ai/axonn.git
 cd axonn
 pip install -e .
 ```
 
+2. Download vocabulary
+```
+wget https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-vocab.json
+wget https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-merges.txt
+```
+
+3. Prepare dataset
+Follow the instructions here - [Data Preprocessing](#data-preprocessing).
 
 # Old Megatron-LM Readme
 
