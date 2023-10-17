@@ -22,7 +22,7 @@ Follow the instructions here - [Data Preprocessing](#data-preprocessing).
 A sample bash script, that works on [Perlmutter](#https://docs.nersc.gov/systems/perlmutter/), can be found in `examples/run_axonn.sh`. You can build your 
 own bash scripts on top of that. Modify the `DATA_DIR` environment variable to point to the datasets and vocabulary files you created in the previous steps.
 Lines 31-34 control your architecture. The `COLUMN_TENSOR_PARR` and `ROW_TENSOR_PARR` variables define the dimensions of the 2D grid over which AxoNN's tensor
-parallelism operates. In the sample script, both these variables are set to 2, which means that AxoNN is sharding your model across a 4 GPUs organized in a 
+parallelism operates. In the sample script, both these variables are set to 2, which means that AxoNN is sharding your model across 4 GPUs organized in a 
 2x2 grid. You should tune these variables based on the memory requirements of your model. 
 
 
