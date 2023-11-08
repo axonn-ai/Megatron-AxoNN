@@ -29,27 +29,23 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=30
-HIDDEN_SIZE=5120
-NUM_HEADS=40
+NUM_LAYERS=24
+HIDDEN_SIZE=1024
+NUM_HEADS=16
 
 ## PARALLELISM DETAILS
-COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=4
-DEPTH_TENSOR_PARR=2
-PIPE_PARR=1
+COLUMN_TENSOR_PARR=2
+ROW_TENSOR_PARR=2
 
 ## BATCH SIZES
 MICRO_BATCH_SIZE=8
 GLOBAL_BATCH_SIZE=16
-SEQUENCE_LENGTH=2048
+SEQUENCE_LENGTH=1024
 
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
     --column-tensor-model-parallel-size ${COLUMN_TENSOR_PARR} \
-    --depth-tensor-model-parallel-size ${DEPTH_TENSOR_PARR} \
-    --pipeline-model-parallel-size ${PIPE_PARR} \
     --num-layers ${NUM_LAYERS} \
     --hidden-size ${HIDDEN_SIZE} \
     --num-attention-heads ${NUM_HEADS} \
@@ -65,15 +61,13 @@ GPT_ARGS="
     --weight-decay 1e-2 \
     --lr-warmup-fraction .01 \
     --clip-grad 1.0 \
-    --bf16 \
-    --use-flash-attn \
-    --recompute-activations
+    --fp16 \
 "
 
 DATA_ARGS="
     --data-path $DATA_PATH \
     --vocab-file $VOCAB_FILE \
-    --mergefile $MERGE_FILE \
+    --merge-file $MERGE_FILE \
     --split 949,50,1
 "
 
