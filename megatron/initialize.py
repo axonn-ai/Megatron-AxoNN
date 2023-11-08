@@ -222,7 +222,7 @@ def _initialize_distributed():
                 args.tensor_model_parallel_size * args.pipeline_model_parallel_size
             )
 
-            assert args.pipeline_model_parallel_size == 1
+            #assert args.pipeline_model_parallel_size == 1
 
             ax.init(
                 G_inter=args.pipeline_model_parallel_size,
@@ -231,6 +231,37 @@ def _initialize_distributed():
                 G_intra_c = args.column_tensor_model_parallel_size,
                 G_intra_d = args.depth_tensor_model_parallel_size,
             )
+
+
+            
+            def test_bw(pg):
+                SZ = int(16 * 2048 * 4096 * 10)
+                msg = torch.rand(SZ, 1, dtype=torch.half, device="cuda")
+                st, en = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+
+                times = []
+                for _ in range(20):
+                    st.record()
+                    torch.distributed.all_reduce(msg, group=pg)
+                    en.record()
+                    torch.cuda.synchronize()
+                    times.append(st.elapsed_time(en))
+                    #print(times[-1]/2)
+
+                size = SZ * 2  ## bytes
+                g = torch.distributed.get_world_size(group=pg)
+                bw = 2 * (g - 1) / g * size / 1e9 / np.mean(times[-10:]) * 1000
+                if torch.distributed.get_rank() == 0:
+                    print(
+                        f"All-reduce bus bw for {g} GPUs is {bw:.3f} GBPS for message size {size/1e9:.3f} GB"
+                    )
+                    print(f"time = {np.mean(times[-10:])} ms")
+
+            test_bw(ax.comm_handle.inner_intra_layer_parallel_group)
+            test_bw(ax.comm_handle.outer_intra_layer_parallel_group)
+            test_bw(ax.comm_handle.depth_intra_layer_parallel_group)
+           
+            exit()
 
             if args.rank == 0:
                 print(
