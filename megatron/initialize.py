@@ -261,7 +261,6 @@ def _initialize_distributed():
             test_bw(ax.comm_handle.outer_intra_layer_parallel_group)
             test_bw(ax.comm_handle.depth_intra_layer_parallel_group)
            
-            exit()
 
             if args.rank == 0:
                 print(

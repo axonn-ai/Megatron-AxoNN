@@ -646,6 +646,7 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[skipped_iters_key])
         log_string += ' number of nan iterations: {:3d} |'.format(
             total_loss_dict[nan_iters_key])
+        log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s'.format(get_flops(elapsed_time_per_iteration))
         total_loss_dict[advanced_iters_key] = 0
         total_loss_dict[skipped_iters_key] = 0
         total_loss_dict[nan_iters_key] = 0
@@ -658,6 +659,17 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
 
     return report_memory_flag
 
+
+def get_flops(batch_time):
+    args = get_args() 
+    batch_size = args.global_batch_size
+    seq_length = args.seq_length
+    num_layers = args.num_layers
+    hidden_size = args.hidden_size
+    vocab_size = args.padded_vocab_size
+    num_gpus = torch.distributed.get_world_size()
+    teraflop_in_batch = 96*batch_size*seq_length*num_layers*(hidden_size**2)*(1+seq_length/(6*hidden_size)+(vocab_size)/(16*num_layers*hidden_size))/(1e12)
+    return teraflop_in_batch/batch_time/num_gpus
 
 def save_checkpoint_and_time(iteration, model, optimizer, opt_param_scheduler):
     timers = get_timers()
