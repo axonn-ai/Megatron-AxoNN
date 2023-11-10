@@ -34,8 +34,9 @@ HIDDEN_SIZE=1024
 NUM_HEADS=16
 
 ## PARALLELISM DETAILS
-COLUMN_TENSOR_PARR=2
+COLUMN_TENSOR_PARR=1
 ROW_TENSOR_PARR=2
+DEPTH_TENSOR_PARR=2
 
 ## BATCH SIZES
 MICRO_BATCH_SIZE=8
@@ -46,6 +47,7 @@ SEQUENCE_LENGTH=1024
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
     --column-tensor-model-parallel-size ${COLUMN_TENSOR_PARR} \
+    --depth-tensor-model-parallel-size ${DEPTH_TENSOR_PARR} \
     --num-layers ${NUM_LAYERS} \
     --hidden-size ${HIDDEN_SIZE} \
     --num-attention-heads ${NUM_HEADS} \

@@ -30,20 +30,24 @@ DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
 NUM_LAYERS=30
-HIDDEN_SIZE=5120
-NUM_HEADS=40
+NUM_HEADS=44
+HIDDEN_SIZE=$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
 ROW_TENSOR_PARR=4
 DEPTH_TENSOR_PARR=2
 PIPE_PARR=1
+OVERLAP=True
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=8
-GLOBAL_BATCH_SIZE=16
-SEQUENCE_LENGTH=2048
+MICRO_BATCH_SIZE=2
+GLOBAL_BATCH_SIZE=2
+SEQUENCE_LENGTH=16384
 
+OUTPUT_FOLDER="./logs/seq_len"
+OUTPUT_FILE="${OUTPUT_FOLDER}/TP-${COLUMN_TENSOR_PARR}x${ROW_TENSOR_PARR}x${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-overlap-${OVERLAP}-seq-length-${SEQUENCE_LENGTH}"
+mkdir -p ${OUTPUT_FOLDER}
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -58,7 +62,7 @@ GPT_ARGS="
     --micro-batch-size ${MICRO_BATCH_SIZE} \
     --global-batch-size ${GLOBAL_BATCH_SIZE} \
     --lr 0.00015 \
-    --train-iters 500000 \
+    --train-iters 10 \
     --lr-decay-iters 320000 \
     --lr-decay-style cosine \
     --min-lr 1.0e-5 \
@@ -67,13 +71,21 @@ GPT_ARGS="
     --clip-grad 1.0 \
     --bf16 \
     --use-flash-attn \
-    --recompute-activations
+    --recompute-granularity full \
+    --recompute-method uniform \
+    --recompute-num-layers 1 \
 "
+if [[ $OVERLAP == "True" ]]
+then
+	GPT_ARGS="${GPT_ARGS} --overlap-axonn-comm"
+fi
+
+
 
 DATA_ARGS="
     --data-path $DATA_PATH \
     --vocab-file $VOCAB_FILE \
-    --mergefile $MERGE_FILE \
+    --merge-file $MERGE_FILE \
     --split 949,50,1
 "
 
@@ -81,7 +93,7 @@ OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 10000 \
     --eval-interval 1000 \
-    --eval-iters 10
+    --eval-iters 1
 "
 
 SCRIPT="python -u pretrain_gpt.py \
@@ -89,12 +101,12 @@ SCRIPT="python -u pretrain_gpt.py \
     $DATA_ARGS \
     $OUTPUT_ARGS \
     --distributed-backend nccl \
-    --save $CHECKPOINT_PATH \
-    --load $CHECKPOINT_PATH
 "
 
+#--save $CHECKPOINT_PATH \
+# --load $CHECKPOINT_PATH
 
-run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}"
+run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT} | tee ${OUTPUT_FILE}"
 
 echo ${run_cmd}
 eval ${run_cmd}

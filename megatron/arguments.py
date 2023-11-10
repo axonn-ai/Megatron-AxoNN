@@ -997,6 +997,8 @@ def _add_distributed_args(parser):
                        help='Degree of tensor model parallelism.')
     group.add_argument('--depth-tensor-model-parallel-size', type=int, default=1,
                        help='Degree of tensor model parallelism.')
+    group.add_argument('--overlap-axonn-comm', action='store_true', default=False,
+                       help='Overlap the communication in AxoNN\'s tensor parallelism')
     group.add_argument('--pipeline-model-parallel-size', type=int, default=1,
                        help='Degree of pipeline model parallelism.')
     group.add_argument('--pipeline-model-parallel-split-rank',

@@ -47,6 +47,8 @@ except ImportError:
         hyperparameters: transformer hyperparameters
 """
 
+DIVIDE_FULLY=False
+
 class DropPath(MegatronModule):
     """Drop paths (Stochastic Depth) per sample
     (when applied in main path of residual blocks).
@@ -217,7 +219,10 @@ class CoreAttention(MegatronModule):
         projection_size = config.kv_channels * config.num_attention_heads
 
         # Per attention head and per partition values.
-        world_size = args.row_tensor_model_parallel_size ## attention heads are divided across the row tensor parallel group
+        if DIVIDE_FULLY:
+            world_size = args.tensor_model_parallel_size ## attention heads are divided across the row tensor parallel group
+        else:
+            world_size = args.row_tensor_model_parallel_size ## attention heads are divided across the row tensor parallel group
         self.hidden_size_per_partition = core.utils.divide(projection_size,
                                                            world_size)
         self.hidden_size_per_attention_head = core.utils.divide(
@@ -437,7 +442,10 @@ class ParallelAttention(MegatronModule):
                 raise ImportError('einops is not installed, please install with pip install einops')
 
         # Per attention head and per partition values.
-        world_size = args.row_tensor_model_parallel_size ## attention heads are divided across the row tensor parallel group
+        if DIVIDE_FULLY:
+            world_size = args.tensor_model_parallel_size ## attention heads are divided across the row tensor parallel group
+        else:
+            world_size = args.row_tensor_model_parallel_size ## attention heads are divided across the row tensor parallel group
         self.hidden_size_per_attention_head = core.utils.divide(
             query_projection_size, config.num_attention_heads)
         self.num_attention_heads_per_partition = core.utils.divide(
@@ -567,6 +575,8 @@ class ParallelAttention(MegatronModule):
 
             # Attention heads [sq, b, h] --> [sq, b, ng * (np/ng + 2) * hn)]
             mixed_x_layer, _ = self.query_key_value(hidden_states, scatter_input=False, gather_output=False)
+            if DIVIDE_FULLY:
+                mixed_x_layer = drop(mixed_x_layer, skip_batch_drop=True)
 
             # [sq, b, hp] --> [sq, b, ng, (np/ng + 2) * hn]
             new_tensor_shape = mixed_x_layer.size()[:-1] + (
@@ -711,6 +721,8 @@ class ParallelAttention(MegatronModule):
         # Output. [sq, b, h]
         # =================
 
+        if DIVIDE_FULLY:
+            context_layer = gather(context_layer, transpose=False, skip_batch_gather=True)
         output, bias = self.dense(context_layer, scatter_input=False, gather_output=False)
         return output, bias
 

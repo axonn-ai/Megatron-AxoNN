@@ -13,7 +13,9 @@ from megatron.core.enums import ModelType
 from megatron.core.pipeline_parallel import p2p_communication
 from megatron.core.utils import get_attr_wrapped_model, get_model_config, get_model_type
 
-import axonn
+from axonn.intra_layer import optimize_communication
+from megatron import get_args
+from contextlib import nullcontext
 
 # Types
 Shape = Union[List[int], torch.Size]
@@ -326,9 +328,25 @@ def forward_backward_no_pipelining(
 
     forward_data_store = []
     input_tensor, output_tensor_grad = None, None
+  
+    args=get_args()
+    #ctx = nullcontext()
+    if args.overlap_axonn_comm:
+        ctx = optimize_communication
+    else:
+        ctx = nullcontext
+
+    def post_process():
+        if args.overlap_axonn_comm:
+            for param in model.parameters():
+                if param.requires_grad:
+                    if param.grad is not None and not param.grad_added_to_main_grad:
+                        param.main_grad.add_(param.grad.data)
+                    param.grad = None
+
     with no_sync_func():
         for i in range(num_microbatches - 1):
-            with axonn.intra_layer.optimize_communication(False):
+            with ctx():#axonn.intra_layer.optimize_communication(False):
                 output_tensor = forward_step(
                     forward_step_func,
                     data_iterator,
@@ -341,10 +359,11 @@ def forward_backward_no_pipelining(
                 )
                 if not forward_only:
                     backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
+                    post_process() # need to call this because of the grad hook in megatron-lm
 
     # Run computation for last microbatch out of context handler (want to
     # synchronize gradients).
-    with axonn.intra_layer.optimize_communication(False):
+    with ctx():#axonn.intra_layer.optimize_communication(False):
         output_tensor = forward_step(
             forward_step_func,
             data_iterator,
@@ -358,6 +377,7 @@ def forward_backward_no_pipelining(
 
         if not forward_only:
             backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
+            post_process() # need to call this because of the grad hook in megatron-lm
 
     return forward_data_store
 
