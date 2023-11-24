@@ -16,6 +16,7 @@ from megatron.core.utils import get_attr_wrapped_model, get_model_config, get_mo
 from axonn.intra_layer import optimize_communication
 from megatron import get_args
 from contextlib import nullcontext
+from functools import partial
 
 # Types
 Shape = Union[List[int], torch.Size]
@@ -332,7 +333,7 @@ def forward_backward_no_pipelining(
     args=get_args()
     #ctx = nullcontext()
     if args.overlap_axonn_comm:
-        ctx = optimize_communication
+        ctx = partial(optimize_communication, cache_weights=args.cache_weights_in_depth_tensor_parallelism)
     else:
         ctx = nullcontext
 

@@ -70,7 +70,9 @@ GPT_ARGS="
 
 if [[ $OVERLAP == "True" ]]
 then
-	GPT_ARGS="${GPT_ARGS} --overlap-axonn-comm"
+	GPT_ARGS="${GPT_ARGS} \
+		--overlap-axonn-comm \
+		--cache-weights-in-depth-tensor-parallelism"
 fi
 
 DATA_ARGS="

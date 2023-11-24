@@ -41,6 +41,7 @@ from megatron.core.pipeline_parallel import get_forward_backward_func
 from megatron.utils import report_memory
 from megatron.model.vision.knn_monitor import compute_feature_bank
 
+import axonn
 
 def print_datetime(string):
     """Note that this call will sync across all ranks."""
@@ -449,6 +450,9 @@ def train_step(forward_step_func, data_iterator,
     timers('optimizer', log_level=1).start(barrier=args.barrier_with_L1_time)
     update_successful, grad_norm, num_zeros_in_grad = optimizer.step(args, timers)
     timers('optimizer').stop()
+
+    if args.overlap_axonn_comm and args.cache_weights_in_depth_tensor_parallelism:
+        axonn.intra_layer.clear_weights_cache()
 
     # Gather params.
     if update_successful:
