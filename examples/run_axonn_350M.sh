@@ -35,14 +35,15 @@ NUM_HEADS=16
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=2
-DEPTH_TENSOR_PARR=2
+ROW_TENSOR_PARR=1
+DEPTH_TENSOR_PARR=4
 
 ## BATCH SIZES
 MICRO_BATCH_SIZE=8
 GLOBAL_BATCH_SIZE=16
 SEQUENCE_LENGTH=1024
 
+OVERLAP="True"
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -65,6 +66,12 @@ GPT_ARGS="
     --clip-grad 1.0 \
     --fp16 \
 "
+
+
+if [[ $OVERLAP == "True" ]]
+then
+	GPT_ARGS="${GPT_ARGS} --overlap-axonn-comm"
+fi
 
 DATA_ARGS="
     --data-path $DATA_PATH \

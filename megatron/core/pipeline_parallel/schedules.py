@@ -359,7 +359,9 @@ def forward_backward_no_pipelining(
                 )
                 if not forward_only:
                     backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
-                    post_process() # need to call this because of the grad hook in megatron-lm
+                
+            if not forward_only:
+                post_process() # need to call this because of the grad hook in megatron-lm
 
     # Run computation for last microbatch out of context handler (want to
     # synchronize gradients).
@@ -377,7 +379,9 @@ def forward_backward_no_pipelining(
 
         if not forward_only:
             backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
-            post_process() # need to call this because of the grad hook in megatron-lm
+        
+    if not forward_only:
+        post_process() # need to call this because of the grad hook in megatron-lm
 
     return forward_data_store
 
