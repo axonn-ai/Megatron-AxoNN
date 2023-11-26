@@ -127,7 +127,7 @@ class ParallelMLP(MegatronModule):
         )
 
     def forward(self, hidden_states):
-
+        torch.cuda.nvtx.range_push(f"MLP Block")
         # [s, b, 4hp]
         intermediate_parallel, bias_parallel = self.dense_h_to_4h(hidden_states, scatter_input=False, gather_output=False)
 
@@ -142,6 +142,7 @@ class ParallelMLP(MegatronModule):
 
         # [s, b, h]
         output, output_bias = self.dense_4h_to_h(intermediate_parallel, scatter_input=False, gather_output=False)
+        torch.cuda.nvtx.range_pop()
         return output, output_bias
 
 
@@ -542,6 +543,7 @@ class ParallelAttention(MegatronModule):
         # =================================================
         # Pre-allocate memory for key-values for inference.
         # =================================================
+        torch.cuda.nvtx.range_push(f"Attention Block")
         is_first_step = False
         if inference_params:
             if self.layer_number not in inference_params.key_value_memory_dict:
@@ -713,6 +715,7 @@ class ParallelAttention(MegatronModule):
         # =================
 
         output, bias = self.dense(context_layer, scatter_input=False, gather_output=False)
+        torch.cuda.nvtx.range_pop()
         return output, bias
 
 
@@ -1054,7 +1057,7 @@ class ParallelTransformerLayer(MegatronModule):
                 inference_params=None,
                 rotary_pos_emb=None):
         # hidden_states: [s, b, h]
-
+        torch.cuda.nvtx.range_push(f"Transformer Layer {self.layer_number}")
         # Layer norm at the beginning of the transformer layer.
         if self.is_first_layer:
             hidden_states = drop(hidden_states, batch_dim=1)
@@ -1174,6 +1177,7 @@ class ParallelTransformerLayer(MegatronModule):
                                               training=self.training)
             output = residual + self.drop_path(out)
 
+        torch.cuda.nvtx.range_pop()
         if self.layer_type == LayerType.retro_decoder_with_retriever:
             return output, retriever_output
         else:

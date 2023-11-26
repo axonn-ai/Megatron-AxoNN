@@ -998,10 +998,13 @@ def _add_distributed_args(parser):
     group.add_argument('--depth-tensor-model-parallel-size', type=int, default=1,
                        help='Degree of tensor model parallelism.')
     group.add_argument('--overlap-axonn-comm', action='store_true', default=False,
-                       help='Overlap the communication in AxoNN\'s tensor parallelism')
-
+                       help='Overlap all-reduces in backward pass ofAxoNN\'s tensor parallelism')
+    group.add_argument('--overlap-axonn-reduce-scatter', action='store_true', default=False,
+                       help='Overlap reduce scatters in backward pass of AxoNN\'s tensor parallelism')
     group.add_argument('--cache-weights-in-depth-tensor-parallelism', action='store_true', default=False,
                        help='cache weights during the first all-gather for a batch and reuse them until optimizer.step()')
+    group.add_argument('--overlap-axonn-all-gather', action='store_true', default=False,
+                       help='Overlap all-gathers in forward pass of AxoNN\'s tensor parallelism')
     
     group.add_argument('--pipeline-model-parallel-size', type=int, default=1,
                        help='Degree of pipeline model parallelism.')

@@ -333,12 +333,17 @@ def forward_backward_no_pipelining(
     args=get_args()
     #ctx = nullcontext()
     if args.overlap_axonn_comm:
-        ctx = partial(optimize_communication, cache_weights=args.cache_weights_in_depth_tensor_parallelism)
+        ctx = partial(optimize_communication, 
+                      overlap_all_reduce=True, 
+                      overlap_reduce_scatter=args.overlap_axonn_reduce_scatter, 
+                      cache_weights=args.cache_weights_in_depth_tensor_parallelism, 
+                      overlap_all_gather=args.overlap_axonn_all_gather, 
+                      model=model)
     else:
         ctx = nullcontext
 
     def post_process():
-        if args.overlap_axonn_comm:
+        if args.overlap_axonn_reduce_scatter:
             for param in model.parameters():
                 if param.requires_grad:
                     if param.grad is not None and not param.grad_added_to_main_grad:

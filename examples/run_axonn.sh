@@ -35,8 +35,8 @@ HIDDEN_SIZE=5120 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=4
-DEPTH_TENSOR_PARR=2
+ROW_TENSOR_PARR=1
+DEPTH_TENSOR_PARR=8
 PIPE_PARR=1
 OVERLAP=True
 
@@ -81,9 +81,10 @@ if [[ $OVERLAP == "True" ]]
 then
 	GPT_ARGS="${GPT_ARGS} \
 		--overlap-axonn-comm \
-		--cache-weights-in-depth-tensor-parallelism"
+		--overlap-axonn-reduce-scatter \
+		--cache-weights-in-depth-tensor-parallelism \
+		--overlap-axonn-all-gather"
 fi
-
 
 
 DATA_ARGS="
