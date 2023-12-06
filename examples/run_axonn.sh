@@ -29,21 +29,21 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=30
+NUM_LAYERS=8
 NUM_HEADS=40
 HIDDEN_SIZE=5120 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
 ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=8
-PIPE_PARR=1
+DEPTH_TENSOR_PARR=1
+PIPE_PARR=4
 OVERLAP=True
 
 NSYS_PROFILE=False
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=16
+MICRO_BATCH_SIZE=2
 GLOBAL_BATCH_SIZE=16
 SEQUENCE_LENGTH=2048
 
@@ -103,7 +103,7 @@ OUTPUT_ARGS="
 
 
 
-SCRIPT="python -u pretrain_gpt.py \
+SCRIPT="python -u pretrain_gpt_axonn.py \
     $GPT_ARGS \
     $DATA_ARGS \
     $OUTPUT_ARGS \
@@ -129,6 +129,7 @@ fi
 #--save $CHECKPOINT_PATH \
 # --load $CHECKPOINT_PATH
 
+export MPICH_GPU_SUPPORT_ENABLED=1
 run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}" #| tee ${OUTPUT_FILE}"
 
 echo ${run_cmd}

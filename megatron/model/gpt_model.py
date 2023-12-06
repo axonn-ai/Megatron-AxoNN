@@ -6,6 +6,7 @@ import torch
 
 from megatron import get_args
 from megatron.core import tensor_parallel
+from megatron import core
 from .module import MegatronModule
 
 from .enums import AttnMaskType
@@ -69,15 +70,36 @@ class GPTModel(MegatronModule):
         if not args.untie_embeddings_and_output_weights:
             self.initialize_word_embeddings()
 
+        attn_mask = torch.tril(
+            torch.ones((1, args.seq_length, args.seq_length)).view(args.seq_length, args.seq_length)
+        )
+        self.register_buffer('attn_mask', attn_mask, persistent=True)
+        self.attn_mask = self.attn_mask < 0.5
+
     def set_input_tensor(self, input_tensor):
         """See megatron.model.transformer.set_input_tensor()"""
         self.language_model.set_input_tensor(input_tensor)
 
-    def forward(self, input_ids, position_ids, attention_mask,
+    def forward(self, input_ids, position_ids=None, attention_mask=None,
                 retriever_input_ids=None,
                 retriever_position_ids=None,
                 retriever_attn_mask=None,
                 labels=None, tokentype_ids=None, inference_params=None):
+        
+        args = get_args()
+        if self.pre_process:
+            if position_ids is None:
+                position_ids = torch.arange(
+                    args.seq_length, dtype=torch.long, device=input_ids.device
+                )
+                position_ids = position_ids.unsqueeze(0)
+                position_ids = position_ids.expand_as(input_ids)
+                
+        if attention_mask is None:
+            attention_mask = self.attn_mask
+
+        if not self.pre_process:
+            self.language_model.encoder.set_input_tensor(input_ids)
 
         lm_output = self.language_model(
             input_ids,
@@ -120,3 +142,5 @@ class GPTModel(MegatronModule):
         if self._language_model_key in state_dict:
             state_dict = state_dict[self._language_model_key]
         self.language_model.load_state_dict(state_dict, strict=strict)
+
+

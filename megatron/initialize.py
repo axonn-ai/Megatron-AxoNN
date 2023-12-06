@@ -218,6 +218,7 @@ def _initialize_distributed():
             )
 
             ## adding code to initialize axonn 
+            assert  torch.distributed.get_world_size() % (args.tensor_model_parallel_size * args.pipeline_model_parallel_size) == 0
             data_parallel_size: int = torch.distributed.get_world_size() // (
                 args.tensor_model_parallel_size * args.pipeline_model_parallel_size
             )
@@ -230,6 +231,7 @@ def _initialize_distributed():
                 G_intra_r = args.row_tensor_model_parallel_size,
                 G_intra_c = args.column_tensor_model_parallel_size,
                 G_intra_d = args.depth_tensor_model_parallel_size,
+                mixed_precision=True
             )
 
 
