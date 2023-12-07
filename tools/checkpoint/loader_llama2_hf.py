@@ -8,7 +8,6 @@ import transformers
 from tqdm import tqdm
 import types
 
-
 def add_arguments(parser):
     group = parser.add_argument_group(title='Llama-2 HF loader.')
 
@@ -21,6 +20,8 @@ def add_arguments(parser):
                        help='Sentencepiece tokenizer model.')
     group.add_argument('--megatron-path', type=str, default=None,
                        help='Base directory of deepspeed repository')
+    group.add_argument('--tensor_model_parallel_size', type=int, default=1,
+                       help='Tensor model parallel size')
 
 
 def verify_transformers_version():
@@ -57,6 +58,7 @@ def load_args_from_checkpoint(args):
     args.padded_vocab_size = llama_args["vocab_size"]
     args.llama = llama_args
     args.ffn_hidden_size = llama_args["intermediate_size"]
+    args.tensor_model_parallel_size = 1
 
     if "num_key_value_heads" in llama_args:
         args.group_query_attention = True
@@ -89,15 +91,16 @@ def set_attn_state(args, layer, hf_layer):
         else args.num_attention_heads) // tp
     dim = args.kv_channels
     assert nh % ng == 0
-
     # Copy weights (re-order dimensions for Megatron).
-    attn.query_key_value.weight.data.copy_(torch.cat([ 
+    attn.query_key_value.weight.data.unsqueeze(0).copy_(torch.cat([ 
         hf_attn.q_proj.weight.reshape((ng, dim*nh//ng, -1)),
         hf_attn.k_proj.weight.reshape((ng, dim, -1)),
         hf_attn.v_proj.weight.reshape((ng, dim, -1)),
-    ], dim=1).reshape((-1, args.hidden_size)))
-    attn.dense.weight.data.copy_(hf_attn.o_proj.weight)
-
+    ], dim=1).reshape((-1, attn.query_key_value.weight.data.shape[-1])))
+    attn.query_key_value.weight.data = attn.query_key_value.weight.data.reshape((-1,args.hidden_size))
+    old_o_proj_shape = hf_attn.o_proj.weight.shape
+    attn.dense.weight.data.unsqueeze(0).copy_(hf_attn.o_proj.weight.reshape((-1, attn.dense.weight.data.shape[-1])))
+    attn.dense.weight.data = attn.dense.weight.data.reshape(old_o_proj_shape)
 
 def set_mlp_state(args, layer, hf_layer):
     '''Set MLP params.'''
@@ -105,11 +108,18 @@ def set_mlp_state(args, layer, hf_layer):
     mlp = layer.mlp
     hf_mlp = hf_layer.mlp
 
-    mlp.dense_h_to_4h.weight.data.copy_(torch.cat([
+    old_cat_shape = torch.cat([
         hf_mlp.gate_proj.weight,
         hf_mlp.up_proj.weight,
-    ], dim=0))
-    mlp.dense_4h_to_h.weight.data.copy_(hf_mlp.down_proj.weight)
+    ], dim=0).shape
+    mlp.dense_h_to_4h.weight.data.unsqueeze(0).copy_(torch.cat([
+        hf_mlp.gate_proj.weight,
+        hf_mlp.up_proj.weight,
+    ], dim=0).reshape((-1,mlp.dense_h_to_4h.weight.data.shape[-1])))
+    mlp.dense_h_to_4h.weight.data = mlp.dense_h_to_4h.weight.data.reshape(old_cat_shape)
+    old_down_proj_shape = hf_mlp.down_proj.weight.shape
+    mlp.dense_4h_to_h.weight.data.unsqueeze(0).copy_(hf_mlp.down_proj.weight.reshape((-1,mlp.dense_4h_to_h.weight.data.shape[-1])))
+    mlp.dense_4h_to_h.weight.data = mlp.dense_4h_to_h.weight.data.reshape(old_down_proj_shape)
 
 
 def set_layer_state(args, model, hf_model, layer_idx):
@@ -144,6 +154,33 @@ def load_checkpoint_to_model(args):
 
     return model
 
+
+def set_device_and_init_torch_dist():
+    from mpi4py import MPI
+    import os
+
+    world_rank = MPI.COMM_WORLD.Get_rank()
+    world_size = MPI.COMM_WORLD.Get_size()
+
+    # assign a unique GPU to each MPI process on a node    
+    local_rank = world_rank % torch.cuda.device_count()
+    torch.cuda.set_device(local_rank)
+
+    init_method = "tcp://"
+    master_ip = os.getenv("MASTER_ADDR", "localhost")
+    master_port = os.getenv("MASTER_PORT", "6000")
+    init_method += master_ip + ":" + master_port
+   
+    # create a process group across all processes 
+    torch.distributed.init_process_group(
+                init_method=init_method,
+                backend="nccl",
+                world_size=world_size,
+                rank=world_rank
+    )
+
+    os.environ["RANK"] = str(world_rank)
+    os.environ["WORLD_SIZE"] = str(world_size)
 
 def _load_checkpoint(queue, args):
 
@@ -221,6 +258,23 @@ def _load_checkpoint(queue, args):
     check_for_arg('params_dtype')
     check_for_arg('swiglu', False)
 
+    ############################################################################
+    set_device_and_init_torch_dist()
+    
+    from axonn import axonn as ax
+
+    data_parallel_size: int = torch.distributed.get_world_size() // (
+                margs.tensor_model_parallel_size * margs.pipeline_model_parallel_size
+            )
+    ax.init(
+        G_inter=margs.pipeline_model_parallel_size,
+        G_data = data_parallel_size,
+        G_intra_r = margs.row_tensor_model_parallel_size,
+        G_intra_c = margs.column_tensor_model_parallel_size,
+        G_intra_d = margs.depth_tensor_model_parallel_size,
+    )
+    ############################################################################
+
     # Determine how to make our models.
     assert args.model_type == 'GPT', 'Llama-2 is a GPT model.'
     margs.model_type = ModelType.encoder_or_decoder
@@ -265,6 +319,11 @@ def _load_checkpoint(queue, args):
     md.checkpoint_args = margs
     md.consumed_train_samples = 0
     md.consumed_valid_samples = 0
+
+    # ############################################################################
+    # # delete the tensor_model_parallel_size from margs
+    # del margs.tensor_model_parallel_size
+    # ############################################################################
 
     # Get first pipe stage.
     mpu.set_tensor_model_parallel_rank(0)

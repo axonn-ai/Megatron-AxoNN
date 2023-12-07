@@ -222,8 +222,8 @@ def save_checkpoint(iteration, model, optimizer, opt_param_scheduler):
     print_rank_0('saving checkpoint at iteration {:7d} to {}'.format(
         iteration, args.save))
 
-    # Collect rng state across data parallel ranks.
-    rng_state = get_rng_state()
+    # # Collect rng state across data parallel ranks.
+    # rng_state = get_rng_state()
 
     # Checkpoint name.
     checkpoint_name = get_checkpoint_name(args.save, iteration)
@@ -236,9 +236,9 @@ def save_checkpoint(iteration, model, optimizer, opt_param_scheduler):
         optimizer.save_parameter_state(optim_checkpoint_name)
 
     # Collect args, model, RNG.
-    if not torch.distributed.is_initialized() \
-       or mpu.get_data_parallel_rank() == 0:
-
+    # if not torch.distributed.is_initialized() \
+    #    or mpu.get_data_parallel_rank() == 0:
+    if not torch.distributed.is_initialized() or os.environ["RANK"] == "0":
         # Arguments, iteration, and model.
         state_dict = {}
         state_dict['args'] = args

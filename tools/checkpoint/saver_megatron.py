@@ -21,6 +21,36 @@ def add_arguments(parser):
     group.add_argument('--target-pipeline-parallel-size', type=int,
                        help='Target tensor model parallel size, default to the pipeline parall size '
                        'in the input checkpoint if provided by the loader, otherwise to 1')
+    group.add_argument('--tensor_model_parallel_size', type=int, default=1,
+                       help='Tensor model parallel size')
+
+def set_device_and_init_torch_dist():
+    from mpi4py import MPI
+    import os
+
+    world_rank = MPI.COMM_WORLD.Get_rank()
+    world_size = MPI.COMM_WORLD.Get_size()
+
+    # assign a unique GPU to each MPI process on a node    
+    local_rank = world_rank % torch.cuda.device_count()
+    torch.cuda.set_device(local_rank)
+
+    init_method = "tcp://"
+    master_ip = os.getenv("MASTER_ADDR", "localhost")
+    master_port = os.getenv("MASTER_PORT", "6002")
+    init_method += master_ip + ":" + master_port
+   
+    # create a process group across all processes 
+    torch.distributed.init_process_group(
+                init_method=init_method,
+                backend="nccl",
+                world_size=world_size,
+                rank=world_rank
+    )
+
+    os.environ["RANK"] = str(world_rank)
+    os.environ["WORLD_SIZE"] = str(world_size)
+
 
 def save_checkpoint(queue, args):
 
@@ -201,6 +231,23 @@ def save_checkpoint(queue, args):
     mpu.set_pipeline_model_parallel_rank(0)
     fused_kernels.load(margs)
 
+    ############################################################################
+    set_device_and_init_torch_dist()
+    
+    from axonn import axonn as ax
+
+    data_parallel_size: int = torch.distributed.get_world_size() // (
+                margs.tensor_model_parallel_size * margs.pipeline_model_parallel_size
+            )
+    ax.init(
+        G_inter=margs.pipeline_model_parallel_size,
+        G_data = data_parallel_size,
+        G_intra_r = margs.row_tensor_model_parallel_size,
+        G_intra_c = margs.column_tensor_model_parallel_size,
+        G_intra_d = margs.depth_tensor_model_parallel_size,
+    )
+    ############################################################################
+
     # Embeddings
     #-----------
     embeddings_msg = queue_get("embeddings")
@@ -304,13 +351,18 @@ def save_checkpoint(queue, args):
                 l.input_norm.weight.data.copy_(input_norm_weight)
                 if md.norm_has_bias:
                     l.input_norm.bias.data.copy_(input_norm_bias)
-                l.self_attention.query_key_value.weight.data.copy_(qkv_weight[tp_rank])
-                l.self_attention.dense.weight.data.copy_(dense_weight[tp_rank])
+                # print("qkv_weight[tp_rank].shape:", qkv_weight[tp_rank].shape)
+                # print("l.self_attention.query_key_value.weight.data.shape:", l.self_attention.query_key_value.weight.data.shape)
+                l.self_attention.query_key_value.weight.data.unsqueeze(0).copy_(qkv_weight[tp_rank].reshape(-1,l.self_attention.query_key_value.weight.data.shape[-1])) 
+                # l.self_attention.dense.weight.data.copy_(dense_weight[tp_rank])
+                l.self_attention.dense.weight.data.unsqueeze(0).copy_(dense_weight[tp_rank].reshape(-1,l.self_attention.dense.weight.data.shape[-1]))
                 l.post_attention_norm.weight.data.copy_(post_norm_weight)
                 if md.norm_has_bias:
                     l.post_attention_norm.bias.data.copy_(post_norm_bias)
-                l.mlp.dense_h_to_4h.weight.data.copy_(mlp_l0_weight[tp_rank])
-                l.mlp.dense_4h_to_h.weight.data.copy_(mlp_l1_weight[tp_rank])
+                # l.mlp.dense_h_to_4h.weight.data.copy_(mlp_l0_weight[tp_rank])
+                l.mlp.dense_h_to_4h.weight.data.unsqueeze(0).copy_(mlp_l0_weight[tp_rank].reshape(-1,l.mlp.dense_h_to_4h.weight.data.shape[-1]))
+                # l.mlp.dense_4h_to_h.weight.data.copy_(mlp_l1_weight[tp_rank])
+                l.mlp.dense_4h_to_h.weight.data.unsqueeze(0).copy_(mlp_l1_weight[tp_rank].reshape(-1,l.mlp.dense_4h_to_h.weight.data.shape[-1]))
                 if md.linear_bias:
                     l.self_attention.query_key_value.bias.data.copy_(qkv_bias[tp_rank])
                     l.self_attention.dense.bias.data.copy_(dense_bias)

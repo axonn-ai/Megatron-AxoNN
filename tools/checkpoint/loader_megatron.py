@@ -17,6 +17,35 @@ def add_arguments(parser):
                        'trim padding from the embedding table.')
     group.add_argument('--megatron-path', type=str, default=None,
                        help='Base directory of deepspeed repository')
+    group.add_argument('--tensor_model_parallel_size', type=int, default=1,
+                       help='Tensor model parallel size')
+
+def set_device_and_init_torch_dist():
+    from mpi4py import MPI
+    import os
+
+    world_rank = MPI.COMM_WORLD.Get_rank()
+    world_size = MPI.COMM_WORLD.Get_size()
+
+    # assign a unique GPU to each MPI process on a node    
+    local_rank = world_rank % torch.cuda.device_count()
+    torch.cuda.set_device(local_rank)
+
+    init_method = "tcp://"
+    master_ip = os.getenv("MASTER_ADDR", "localhost")
+    master_port = os.getenv("MASTER_PORT", "6001")
+    init_method += master_ip + ":" + master_port
+   
+    # create a process group across all processes 
+    torch.distributed.init_process_group(
+                init_method=init_method,
+                backend="nccl",
+                world_size=world_size,
+                rank=world_rank
+    )
+
+    os.environ["RANK"] = str(world_rank)
+    os.environ["WORLD_SIZE"] = str(world_size)
 
 def _load_checkpoint(queue, args):
 
@@ -89,6 +118,24 @@ def _load_checkpoint(queue, args):
     check_for_arg('disable_bias_linear', False)
     check_for_arg('params_dtype')
     check_for_arg('swiglu', False)
+
+
+    ############################################################################
+    set_device_and_init_torch_dist()
+    
+    from axonn import axonn as ax
+
+    data_parallel_size: int = torch.distributed.get_world_size() // (
+                margs.tensor_model_parallel_size * margs.pipeline_model_parallel_size
+            )
+    ax.init(
+        G_inter=margs.pipeline_model_parallel_size,
+        G_data = data_parallel_size,
+        G_intra_r = margs.row_tensor_model_parallel_size,
+        G_intra_c = margs.column_tensor_model_parallel_size,
+        G_intra_d = margs.depth_tensor_model_parallel_size,
+    )
+    ############################################################################
 
     # Determine how to make our models
     if args.model_type == 'GPT':
