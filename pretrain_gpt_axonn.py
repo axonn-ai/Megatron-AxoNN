@@ -28,6 +28,8 @@ from megatron.training import get_model, get_optimizer_param_scheduler
 from apex.optimizers import FusedAdam as Adam
 from megatron.data.data_samplers import build_pretraining_data_loader
 import types
+from megatron.core import tensor_parallel
+from megatron.training import get_flops
 
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
@@ -77,9 +79,9 @@ def get_batch(data_iterator):
 
     return tokens, labels, loss_mask, attention_mask, position_ids
 
-def loss_func(loss_mask, output_tensor):
-    losses = output_tensor.float()
-    loss = torch.mean(output_tensor)
+def loss_func(output, label):
+    loss = tensor_parallel.vocab_parallel_cross_entropy(output.float(), label)
+    loss = torch.mean(loss)
     return loss
 
     # Check individual rank losses are not NaN prior to DP all-reduce.
@@ -151,10 +153,9 @@ def set_device_and_init_torch_dist():
     master_ip = os.getenv("MASTER_ADDR", "localhost")
     master_port = os.getenv("MASTER_PORT", "6000")
     init_method += master_ip + ":" + master_port
-   
     # create a process group across all processes 
     torch.distributed.init_process_group(
-                init_method=init_method,
+                init_method = "file:///lustre/orion/scratch/ssingh37/csc547/Megatron-AxoNN/file",
                 backend="nccl",
                 world_size=world_size,
                 rank=world_rank
@@ -223,12 +224,24 @@ if __name__ == "__main__":
         #x = next(train_iterator)
         #print(x['text'].shape)
     
-    
     batch, labels, _, _, _ = get_batch(train_iterator)
    
     num_micro_batches = args.global_batch_size // ax.config.G_data // args.micro_batch_size
     print(num_micro_batches)
     model.get_input_shape = types.MethodType(get_input_shape, model)
     model.get_output_shape = types.MethodType(get_input_shape, model)
-    loss = ax.run_batch(batch, labels, num_microbatches=args.global_batch_size // ax.config.G_data // args.micro_batch_size, micro_batch_size=args.micro_batch_size) 
-    print(loss)
+    
+    start_event = torch.cuda.Event(enable_timing=True)
+    end_event = torch.cuda.Event(enable_timing=True)
+    
+    for _ in range(20):
+        start_event.record()
+        iter_loss = ax.run_batch(batch, labels, num_microbatches=args.global_batch_size // ax.config.G_data // args.micro_batch_size, micro_batch_size=args.micro_batch_size) 
+        optimizer.step()
+        lr_scheduler.step(increment=args.global_batch_size)
+        end_event.record()
+        torch.cuda.synchronize()
+        time = start_event.elapsed_time(end_event) / 1000
+        tflops = get_flops(time) 
+        print(f"Iter loss = {iter_loss:.3f} | time = {time:.2f} s | tflops = {tflops:.2f} TFLOP/s")
+
