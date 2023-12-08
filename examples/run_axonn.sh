@@ -29,23 +29,24 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=8
-NUM_HEADS=40
-HIDDEN_SIZE=5120 #$(( 128 * NUM_HEADS ))
+NUM_LAYERS=32
+NUM_HEADS=56
+HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
 ROW_TENSOR_PARR=1
 DEPTH_TENSOR_PARR=1
-PIPE_PARR=4
+PIPE_PARR=16
 OVERLAP=True
 
 NSYS_PROFILE=False
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=2
-GLOBAL_BATCH_SIZE=16
+MICRO_BATCH_SIZE=1
+GLOBAL_BATCH_SIZE=128
 SEQUENCE_LENGTH=2048
+TRAIN_ITERS=100
 
 #OUTPUT_FOLDER="./logs/seq_len"
 #OUTPUT_FILE="${OUTPUT_FOLDER}/TP-${COLUMN_TENSOR_PARR}x${ROW_TENSOR_PARR}x${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-overlap-${OVERLAP}-seq-length-${SEQUENCE_LENGTH}"
@@ -64,7 +65,7 @@ GPT_ARGS="
     --micro-batch-size ${MICRO_BATCH_SIZE} \
     --global-batch-size ${GLOBAL_BATCH_SIZE} \
     --lr 0.00015 \
-    --train-iters 10 \
+    --train-iters ${TRAIN_ITERS} \
     --lr-decay-iters 320000 \
     --lr-decay-style cosine \
     --min-lr 1.0e-5 \
@@ -76,16 +77,21 @@ GPT_ARGS="
     --recompute-granularity full \
     --recompute-method uniform \
     --recompute-num-layers 1 \
-"
+    --no-gradient-accumulation-fusion \
+    --untie-embeddings-and-output-weights	
+    " # only set for pipelineing
+
+
 if [[ $OVERLAP == "True" ]]
 then
 	GPT_ARGS="${GPT_ARGS} \
 		--overlap-axonn-comm \
 		--overlap-axonn-reduce-scatter \
-		--cache-weights-in-depth-tensor-parallelism \
-		--overlap-axonn-all-gather"
+		"
 fi
 
+		#--cache-weights-in-depth-tensor-parallelism \
+		#--overlap-axonn-all-gather"
 
 DATA_ARGS="
     --data-path $DATA_PATH \
@@ -130,6 +136,7 @@ fi
 # --load $CHECKPOINT_PATH
 
 export MPICH_GPU_SUPPORT_ENABLED=1
+export CRAY_ACCEL_TARGET=nvidia80
 run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}" #| tee ${OUTPUT_FILE}"
 
 echo ${run_cmd}

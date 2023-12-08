@@ -1181,8 +1181,8 @@ class ParallelTransformerLayer(MegatronModule):
         if self.layer_type == LayerType.retro_decoder_with_retriever:
             return output, retriever_output
         else:
-            if self.is_last_layer:
-                output = gather(output, batch_dim=1)
+            #if self.is_last_layer:
+            #    output = gather(output, batch_dim=1)
             return output
 
 
@@ -1496,7 +1496,12 @@ class ParallelTransformer(MegatronModule):
 
         if self.post_process and self.post_norm:
             # Final layer norm before output.
+            #self.final_norm = get_norm(config)
+            original_hidden_size = config.hidden_size
+            config.hidden_size = core.utils.divide(original_hidden_size, 
+                                               args.column_tensor_model_parallel_size)
             self.final_norm = get_norm(config)
+            config.hidden_size = original_hidden_size
 
     def _get_layer(self, layer_number):
         return self.layers[layer_number]

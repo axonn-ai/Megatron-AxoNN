@@ -1,7 +1,6 @@
 # Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
 
 """Pretrain GPT"""
-
 import os
 import torch
 from functools import partial
@@ -19,8 +18,8 @@ from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
 from megatron.arguments import core_transformer_config_from_args
 
-
 from axonn import axonn as ax
+from axonn.intra_layer import clear_weights_cache
 from megatron.global_vars import set_global_variables
 from megatron import get_args
 from megatron.initialize import _initialize_distributed, _set_random_seed, initialize_megatron 
@@ -29,7 +28,11 @@ from apex.optimizers import FusedAdam as Adam
 from megatron.data.data_samplers import build_pretraining_data_loader
 import types
 from megatron.core import tensor_parallel
-from megatron.training import get_flops
+from megatron.training import get_flops, get_params, get_mem
+from axonn.intra_layer import optimize_communication
+from functools import partial
+from contextlib import nullcontext
+
 
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
@@ -155,7 +158,7 @@ def set_device_and_init_torch_dist():
     init_method += master_ip + ":" + master_port
     # create a process group across all processes 
     torch.distributed.init_process_group(
-                init_method = "file:///lustre/orion/scratch/ssingh37/csc547/Megatron-AxoNN/file",
+                init_method = init_method, 
                 backend="nccl",
                 world_size=world_size,
                 rank=world_rank
@@ -176,19 +179,72 @@ def get_input_shape(self):
             core.utils.divide(args.micro_batch_size, args.depth_tensor_model_parallel_size), 
             core.utils.divide(args.hidden_size, args.column_tensor_model_parallel_size)]
 
+def get_log(iteration, 
+            iter_loss,
+            elapsed_time_per_iteration, 
+            learning_rate, 
+            batch_size,
+            loss_scale,
+            grad_norm,
+            num_zeros_in_grad,
+            params_norm):
+    args = get_args()
+    log_string = ' iteration {:8d}/{:8d} |'.format(
+            iteration, args.train_iters)
+    log_string += ' consumed samples: {:12d} |'.format(
+        args.consumed_train_samples)
+    log_string += ' elapsed time per iteration (ms): {:.1f} |'.format(
+        elapsed_time_per_iteration * 1000.0)
+    log_string += ' learning rate: {:.3E} |'.format(learning_rate)
+    log_string += ' global batch size: {:5d} |'.format(batch_size)
+    log_string += ' loss: {:.6E} |'.format(iter_loss)
+    #for key in total_loss_dict:
+    #    if key not in [advanced_iters_key, skipped_iters_key,
+    #                   nan_iters_key]:
+    #        avg = total_loss_dict[key].item() / \
+    #              float(max(1, total_loss_dict[advanced_iters_key]))
+    #        if avg > 0.0:
+    #            log_string += ' {}: {:.6E} |'.format(key, avg)
+    #        total_loss_dict[key] = torch.cuda.FloatTensor([0.0])
+    log_string += ' loss scale: {:.1f} |'.format(loss_scale)
+    if grad_norm is not None:
+        log_string += ' grad norm: {:.3f} |'.format(grad_norm)
+    if num_zeros_in_grad is not None:
+        log_string += ' num zeros: {:.1f} |'.format(num_zeros_in_grad)
+    if params_norm is not None:
+        log_string += ' params norm: {:.3f} |'.format(params_norm)
+    #log_string += ' number of skipped iterations: {:3d} |'.format(
+    #    total_loss_dict[skipped_iters_key])
+    #log_string += ' number of nan iterations: {:3d} |'.format(
+    #    total_loss_dict[nan_iters_key])
+    log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s | '.format(get_flops(elapsed_time_per_iteration))
+    log_string += ' model size: {:.3f} B params | '.format(get_params())
+    log_string += ' memory used by tensors {:.3f} GB '.format(get_mem())
+    return log_string
+
+def get_context(model):
+    args = get_args()
+    if args.overlap_axonn_comm:
+        ctx = partial(optimize_communication, 
+                      overlap_all_reduce=True, 
+                      overlap_reduce_scatter=args.overlap_axonn_reduce_scatter, 
+                      cache_weights=args.cache_weights_in_depth_tensor_parallelism, 
+                      overlap_all_gather=args.overlap_axonn_all_gather, 
+                      model=model)
+    else:
+        ctx = nullcontext
+    
+    return ctx
 
 if __name__ == "__main__":
     set_device_and_init_torch_dist()
-    if False:
-        args = get_args()
-        set_global_variables(args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
-        _initialize_distributed()
-        _set_random_seed(args.seed, args.data_parallel_random_init)
-    else:
-        initialize_megatron(args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
+    initialize_megatron(args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
   
     args = get_args()
-    model = get_model(model_provider, wrap_with_ddp=False)[0].cuda()
+    timers = get_timers()
+    args.model_type = ModelType.encoder_or_decoder
+    model = model_provider(pre_process=ax.config.inter_layer_parallel_rank == 0, 
+                           post_process=ax.config.inter_layer_parallel_rank == ax.config.G_inter - 1).cuda()
     optimizer = Adam(
         model.parameters(),
         lr=args.lr,
@@ -225,23 +281,40 @@ if __name__ == "__main__":
         #print(x['text'].shape)
     
     batch, labels, _, _, _ = get_batch(train_iterator)
-   
+  
+    assert args.global_batch_size % (ax.config.G_data * args.micro_batch_size) == 0
     num_micro_batches = args.global_batch_size // ax.config.G_data // args.micro_batch_size
-    print(num_micro_batches)
     model.get_input_shape = types.MethodType(get_input_shape, model)
     model.get_output_shape = types.MethodType(get_input_shape, model)
     
     start_event = torch.cuda.Event(enable_timing=True)
     end_event = torch.cuda.Event(enable_timing=True)
-    
-    for _ in range(20):
+    total_loss_dict = {}
+    args.consumed_samples = 0
+
+    for iteration in range(args.train_iters):
         start_event.record()
-        iter_loss = ax.run_batch(batch, labels, num_microbatches=args.global_batch_size // ax.config.G_data // args.micro_batch_size, micro_batch_size=args.micro_batch_size) 
+        ctx = get_context(model)
+        with ctx():
+            iter_loss = ax.run_batch(batch, labels, num_microbatches=num_micro_batches, micro_batch_size=args.micro_batch_size) 
         optimizer.step()
+        clear_weights_cache()
         lr_scheduler.step(increment=args.global_batch_size)
+        args.consumed_samples += args.global_batch_size * args.seq_length
         end_event.record()
         torch.cuda.synchronize()
         time = start_event.elapsed_time(end_event) / 1000
         tflops = get_flops(time) 
-        print(f"Iter loss = {iter_loss:.3f} | time = {time:.2f} s | tflops = {tflops:.2f} TFLOP/s")
+        
+        log = get_log(iteration, 
+            iter_loss,
+            elapsed_time_per_iteration=time, 
+            learning_rate=optimizer.param_groups[0]['lr'], 
+            batch_size=args.global_batch_size,
+            loss_scale=ax.loss_scale,
+            grad_norm=None,
+            num_zeros_in_grad=None,
+            params_norm=None)
 
+        if torch.distributed.get_rank() == torch.distributed.get_world_size() - 1:
+            print(log)

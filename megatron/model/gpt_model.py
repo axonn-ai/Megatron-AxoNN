@@ -13,16 +13,26 @@ from .enums import AttnMaskType
 from .language_model import parallel_lm_logits
 from .language_model import get_language_model
 
+from axonn.intra_layer import gather
 
 def post_language_model_processing(lm_output, labels, logit_weights,
                                    parallel_output,
                                    fp16_lm_cross_entropy):
 
     # Output. Format [s b h]
+
+    lm_output = gather(lm_output,
+                    dim=-1, batch_dim=1, skip_row_col_gather=False, 
+                    skip_batch_gather=True)
+    
     output = parallel_lm_logits(
         lm_output,
         logit_weights,
         parallel_output)
+
+    output = gather(output,
+                    dim=-1, batch_dim=1, skip_row_col_gather=True, 
+                    skip_batch_gather=False)
 
     if labels is None:
         # [s b h] => [b s h]
@@ -70,11 +80,6 @@ class GPTModel(MegatronModule):
         if not args.untie_embeddings_and_output_weights:
             self.initialize_word_embeddings()
 
-        attn_mask = torch.tril(
-            torch.ones((1, args.seq_length, args.seq_length)).view(args.seq_length, args.seq_length)
-        )
-        self.register_buffer('attn_mask', attn_mask, persistent=True)
-        self.attn_mask = self.attn_mask < 0.5
 
     def set_input_tensor(self, input_tensor):
         """See megatron.model.transformer.set_input_tensor()"""
@@ -85,7 +90,7 @@ class GPTModel(MegatronModule):
                 retriever_position_ids=None,
                 retriever_attn_mask=None,
                 labels=None, tokentype_ids=None, inference_params=None):
-        
+      
         args = get_args()
         if self.pre_process:
             if position_ids is None:
@@ -96,10 +101,18 @@ class GPTModel(MegatronModule):
                 position_ids = position_ids.expand_as(input_ids)
                 
         if attention_mask is None:
+            if not hasattr(self, 'attn_mask'):
+                attn_mask = torch.tril(
+                    torch.ones((1, args.seq_length, args.seq_length)).view(args.seq_length, args.seq_length)
+                )
+                self.register_buffer('attn_mask', attn_mask, persistent=True)
+                self.attn_mask = self.attn_mask < 0.5
             attention_mask = self.attn_mask
 
+
         if not self.pre_process:
-            self.language_model.encoder.set_input_tensor(input_ids)
+            self.set_input_tensor(input_ids)
+
 
         lm_output = self.language_model(
             input_ids,
