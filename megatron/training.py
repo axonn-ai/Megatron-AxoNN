@@ -652,7 +652,8 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[nan_iters_key])
         log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s | '.format(get_flops(elapsed_time_per_iteration))
         log_string += ' model size: {:.3f} B params | '.format(get_params())
-        log_string += ' memory used by tensors {:.3f} GB '.format(get_mem())
+        curr_mem, max_mem = get_mem()
+        log_string += ' memory used by tensors - current = {:.3f} GB (Peak = {:.3f} GB)'.format(curr_mem, max_mem)
 
         total_loss_dict[advanced_iters_key] = 0
         total_loss_dict[skipped_iters_key] = 0
@@ -690,7 +691,9 @@ def get_params():
     return params
    
 def get_mem():
-    return torch.cuda.memory_allocated() / 1024 / 1024 / 1024
+    curr = torch.cuda.memory_allocated() / 1024 / 1024 / 1024
+    maxm = torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024
+    return curr, maxm
 
 def save_checkpoint_and_time(iteration, model, optimizer, opt_param_scheduler):
     timers = get_timers()

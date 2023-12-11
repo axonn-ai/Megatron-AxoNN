@@ -228,8 +228,8 @@ def get_context(model):
         ctx = partial(optimize_communication, 
                       overlap_all_reduce=True, 
                       overlap_reduce_scatter=args.overlap_axonn_reduce_scatter, 
-                      cache_weights=args.cache_weights_in_depth_tensor_parallelism, 
-                      overlap_all_gather=args.overlap_axonn_all_gather, 
+                      cache_weights=False,#args.cache_weights_in_depth_tensor_parallelism, 
+                      overlap_all_gather=False,#args.overlap_axonn_all_gather, 
                       model=model)
     else:
         ctx = nullcontext
@@ -295,8 +295,7 @@ if __name__ == "__main__":
     for iteration in range(args.train_iters):
         start_event.record()
         ctx = get_context(model)
-        with ctx():
-            iter_loss = ax.run_batch(batch, labels, num_microbatches=num_micro_batches, micro_batch_size=args.micro_batch_size) 
+        iter_loss = ax.run_batch(batch, labels, num_microbatches=num_micro_batches, micro_batch_size=args.micro_batch_size, ctx=ctx) 
         optimizer.step()
         clear_weights_cache()
         lr_scheduler.step(increment=args.global_batch_size)

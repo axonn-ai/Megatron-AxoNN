@@ -9,9 +9,9 @@ NNODES=$SLURM_JOB_NUM_NODES
 GPUS=$(( NNODES * 4 ))
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=29500
-export CUDA_DEVICE_MAX_CONNECTIONS=1
+#export CUDA_DEVICE_MAX_CONNECTIONS=1
 export NCCL_NET_GDR_LEVEL=PHB
-export CUDA_DEVICE_MAX_CONNECTIONS=1
+#export CUDA_DEVICE_MAX_CONNECTIONS=1
 export CUDA_VISIBLE_DEVICES=3,2,1,0
 export NCCL_CROSS_NIC=1
 export NCCL_SOCKET_IFNAME=hsn
@@ -36,17 +36,18 @@ HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
 ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=1
-PIPE_PARR=16
+DEPTH_TENSOR_PARR=16
+PIPE_PARR=1
 OVERLAP=True
 
 NSYS_PROFILE=False
+PROF_OUTPUT="test_red_scat_without_max_con"
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=128
+MICRO_BATCH_SIZE=64
+GLOBAL_BATCH_SIZE=64
 SEQUENCE_LENGTH=2048
-TRAIN_ITERS=100
+TRAIN_ITERS=10
 
 #OUTPUT_FOLDER="./logs/seq_len"
 #OUTPUT_FILE="${OUTPUT_FOLDER}/TP-${COLUMN_TENSOR_PARR}x${ROW_TENSOR_PARR}x${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-overlap-${OVERLAP}-seq-length-${SEQUENCE_LENGTH}"
@@ -78,7 +79,8 @@ GPT_ARGS="
     --recompute-method uniform \
     --recompute-num-layers 1 \
     --no-gradient-accumulation-fusion \
-    --untie-embeddings-and-output-weights	
+    --untie-embeddings-and-output-weights \
+    --no-async-tensor-model-parallel-allreduce
     " # only set for pipelineing
 
 
@@ -87,11 +89,13 @@ then
 	GPT_ARGS="${GPT_ARGS} \
 		--overlap-axonn-comm \
 		--overlap-axonn-reduce-scatter \
+		--overlap-axonn-all-gather \
+		--cache-weights-in-depth-tensor-parallelism 
 		"
+		
 fi
 
-		#--cache-weights-in-depth-tensor-parallelism \
-		#--overlap-axonn-all-gather"
+		
 
 DATA_ARGS="
     --data-path $DATA_PATH \
@@ -109,7 +113,7 @@ OUTPUT_ARGS="
 
 
 
-SCRIPT="python -u pretrain_gpt_axonn.py \
+SCRIPT="python -u pretrain_gpt.py \
     $GPT_ARGS \
     $DATA_ARGS \
     $OUTPUT_ARGS \
@@ -120,7 +124,7 @@ if [[ ${NSYS_PROFILE} == "True" ]]
 then
 	echo "profiling with nsys"
 	SCRIPT="nsys profile -s none \
-		-t nvtx,cuda -o test.qdrep \
+		-t nvtx,cuda -o ${PROF_OUTPUT}.qdrep \
 		--force-overwrite=true  \
 		--capture-range=cudaProfilerApi \
 		--capture-range-end=stop \
