@@ -117,8 +117,8 @@ def _compile_dependencies():
     # Custom kernel constraints check.
     seq_len = args.seq_length
     attn_batch_size = (
-        args.num_attention_heads / args.tensor_model_parallel_size
-    ) * args.micro_batch_size
+        args.num_attention_heads / args.row_tensor_model_parallel_size
+    ) * args.micro_batch_size / args.depth_tensor_model_parallel_size
     # Constraints on sequence length and attn_batch_size to enable warp based
     # optimization and upper triangular optimization (for causal mask)
     custom_kernel_constraint = (
@@ -348,15 +348,15 @@ def _warmup_jit_function():
 
     # Warmup fused bias+gelu
     bias = torch.rand(
-        args.ffn_hidden_size // args.tensor_model_parallel_size,
+        args.ffn_hidden_size // args.row_tensor_model_parallel_size,
         dtype=dtype,
         device="cuda",
     )
     input = torch.rand(
         (
             args.seq_length,
-            args.micro_batch_size,
-            args.ffn_hidden_size // args.tensor_model_parallel_size,
+            args.micro_batch_size // args.depth_tensor_model_parallel_size,
+            args.ffn_hidden_size // args.row_tensor_model_parallel_size,
         ),
         dtype=dtype,
         device="cuda",
@@ -371,20 +371,22 @@ def _warmup_jit_function():
 
     # Warmup fused bias+dropout+add
     if args.sequence_parallel:
+        raise NotImplementedError
         seq_length = args.seq_length // mpu.get_tensor_model_parallel_world_size()
     else:
         seq_length = args.seq_length
     input = torch.rand(
-        (seq_length, args.micro_batch_size, args.hidden_size),
+        (seq_length, args.micro_batch_size // args.depth_tensor_model_parallel_size, 
+         args.hidden_size // args.column_tensor_model_parallel_size),
         dtype=dtype,
         device="cuda",
     )
     residual = torch.rand(
-        (seq_length, args.micro_batch_size, args.hidden_size),
+        (seq_length, args.micro_batch_size // args.depth_tensor_model_parallel_size, args.hidden_size // args.column_tensor_model_parallel_size),
         dtype=dtype,
         device="cuda",
     )
-    bias = torch.rand((args.hidden_size), dtype=dtype, device="cuda").expand_as(
+    bias = torch.rand((args.hidden_size // args.column_tensor_model_parallel_size), dtype=dtype, device="cuda").expand_as(
         residual
     )
     dropout_rate = 0.1

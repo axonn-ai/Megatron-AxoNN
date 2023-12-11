@@ -68,10 +68,10 @@ def get_batch(data_iterator):
 
 
     #print(tokens.shape, labels.shape, loss_mask.shape, attention_mask.shape, position_ids.shape)
-    tokens = drop(tokens, skip_channels=True)
-    labels = drop(labels, skip_channels=True)
-    loss_mask = drop(loss_mask, skip_channels=True)
-    position_ids = drop(position_ids, skip_channels=True)
+    #tokens = drop(tokens, skip_channels=True)
+    #labels = drop(labels, skip_channels=True)
+    #loss_mask = drop(loss_mask, skip_channels=True)
+    #position_ids = drop(position_ids, skip_channels=True)
     return tokens, labels, loss_mask, attention_mask, position_ids
 
 def loss_func(loss_mask, output_tensor):
