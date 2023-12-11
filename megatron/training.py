@@ -451,8 +451,7 @@ def train_step(forward_step_func, data_iterator,
     update_successful, grad_norm, num_zeros_in_grad = optimizer.step(args, timers)
     timers('optimizer').stop()
 
-    if args.overlap_axonn_comm and args.cache_weights_in_depth_tensor_parallelism:
-        axonn.intra_layer.clear_weights_cache()
+    axonn.intra_layer.clear_weights_cache()
 
     # Gather params.
     if update_successful:
@@ -652,7 +651,8 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[nan_iters_key])
         log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s | '.format(get_flops(elapsed_time_per_iteration))
         log_string += ' model size: {:.3f} B params | '.format(get_params())
-        log_string += ' memory used by tensors {:.3f} GB '.format(get_mem())
+        curr, peak = get_mem()
+        log_string += ' memory used by tensors {:.3f} GB ( peak {:.3f} GB)'.format(curr, peak)
 
         total_loss_dict[advanced_iters_key] = 0
         total_loss_dict[skipped_iters_key] = 0
@@ -690,7 +690,9 @@ def get_params():
     return params
    
 def get_mem():
-    return torch.cuda.memory_allocated() / 1024 / 1024 / 1024
+    curr =  torch.cuda.memory_allocated() / 1024 / 1024 / 1024
+    peak =  torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024
+    return curr, peak
 
 def save_checkpoint_and_time(iteration, model, optimizer, opt_param_scheduler):
     timers = get_timers()

@@ -18,6 +18,8 @@ from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
 from megatron.arguments import core_transformer_config_from_args
 
+from axonn.intra_layer import drop
+
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
     args = get_args()
@@ -64,6 +66,12 @@ def get_batch(data_iterator):
         args.reset_attention_mask,
         args.eod_mask_loss)
 
+
+    #print(tokens.shape, labels.shape, loss_mask.shape, attention_mask.shape, position_ids.shape)
+    tokens = drop(tokens, skip_channels=True)
+    labels = drop(labels, skip_channels=True)
+    loss_mask = drop(loss_mask, skip_channels=True)
+    position_ids = drop(position_ids, skip_channels=True)
     return tokens, labels, loss_mask, attention_mask, position_ids
 
 def loss_func(loss_mask, output_tensor):

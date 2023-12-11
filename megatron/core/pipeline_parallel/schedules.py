@@ -336,9 +336,9 @@ def forward_backward_no_pipelining(
         ctx = partial(optimize_communication, 
                       overlap_all_reduce=True, 
                       overlap_reduce_scatter=args.overlap_axonn_reduce_scatter, 
-                      cache_weights=args.cache_weights_in_depth_tensor_parallelism, 
                       overlap_all_gather=args.overlap_axonn_all_gather, 
-                      model=model)
+                      model_object_for_overlapping_allgathers=model
+                      )
     else:
         ctx = nullcontext
 

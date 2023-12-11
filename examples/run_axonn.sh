@@ -29,14 +29,14 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=30
-NUM_HEADS=40
-HIDDEN_SIZE=5120 #$(( 128 * NUM_HEADS ))
+NUM_LAYERS=32
+NUM_HEADS=56
+HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
 ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=8
+DEPTH_TENSOR_PARR=16
 PIPE_PARR=1
 OVERLAP=True
 
@@ -82,10 +82,11 @@ then
 	GPT_ARGS="${GPT_ARGS} \
 		--overlap-axonn-comm \
 		--overlap-axonn-reduce-scatter \
-		--cache-weights-in-depth-tensor-parallelism \
-		--overlap-axonn-all-gather"
+		--overlap-axonn-all-gather\
+		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather 2"
 fi
 
+		#--cache-weights-in-depth-tensor-parallelism \
 
 DATA_ARGS="
     --data-path $DATA_PATH \
