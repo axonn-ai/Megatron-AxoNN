@@ -13,7 +13,7 @@ from megatron.core.enums import ModelType
 from megatron.core.pipeline_parallel import p2p_communication
 from megatron.core.utils import get_attr_wrapped_model, get_model_config, get_model_type
 
-from axonn.intra_layer import optimize_communication
+from axonn.intra_layer import optimize_communication, sync_gradients
 from megatron import get_args
 from contextlib import nullcontext
 from functools import partial
@@ -385,7 +385,8 @@ def forward_backward_no_pipelining(
 
         if not forward_only:
             backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
-        
+    
+    sync_gradients(model, gradient_attr_name="main_grad")
     if not forward_only:
         post_process() # need to call this because of the grad hook in megatron-lm
 
