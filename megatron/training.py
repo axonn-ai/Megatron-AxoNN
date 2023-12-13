@@ -42,6 +42,7 @@ from megatron.utils import report_memory
 from megatron.model.vision.knn_monitor import compute_feature_bank
 
 import axonn
+from axonn import axonn as ax
 
 def print_datetime(string):
     """Note that this call will sync across all ranks."""
@@ -1007,7 +1008,12 @@ def build_train_valid_test_data_loaders(
                 args.eval_iters * args.global_batch_size
 
     # Data loader only on rank 0 of each model parallel group.
-    if mpu.get_tensor_model_parallel_rank() == 0:
+    process_group = ax.comm_handle.outer_inner_intra_layer_parallel_group
+    src_rank = ax.comm_handle.outer_inner_intra_layer_parallel_group_root
+    rank_in_pg = torch.distributed.get_rank(process_group)
+    
+    if rank_in_pg == 0:#ax.config.intra_layer_row_parallel_rank == 0 and ax.config.intra_layer_column_parallel_rank == 0:     
+        #mpu.get_tensor_model_parallel_rank() == 0:
 
         # Build datasets.
         train_ds, valid_ds, test_ds = build_train_valid_test_datasets(
@@ -1035,8 +1041,8 @@ def build_train_valid_test_data_loaders(
 
     # Broadcast num tokens.
     torch.distributed.broadcast(flags,
-                                mpu.get_tensor_model_parallel_src_rank(),
-                                group=mpu.get_tensor_model_parallel_group())
+                                src_rank,
+                                group=process_group)
     args.do_train = flags[0].item()
     args.do_valid = flags[1].item()
     args.do_test = flags[2].item()

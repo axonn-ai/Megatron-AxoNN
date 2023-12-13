@@ -45,19 +45,20 @@ def get_batch(data_iterator):
     # Items and their type.
     keys = ['text']
     datatype = torch.int64
-
     # Broadcast data.
     if data_iterator is not None:
         data = next(data_iterator)
     else:
         data = None
+
     data_b = tensor_parallel.broadcast_data(keys, data, datatype)
+    
 
     # Unpack.
     tokens_ = data_b['text'].long()
     labels = tokens_[:, 1:].contiguous()
     tokens = tokens_[:, :-1].contiguous()
-
+    
     # Get the masks and postition ids.
     attention_mask, loss_mask, position_ids = get_ltor_masks_and_position_ids(
         tokens,
@@ -66,12 +67,6 @@ def get_batch(data_iterator):
         args.reset_attention_mask,
         args.eod_mask_loss)
 
-
-    #print(tokens.shape, labels.shape, loss_mask.shape, attention_mask.shape, position_ids.shape)
-    #tokens = drop(tokens, skip_channels=True)
-    #labels = drop(labels, skip_channels=True)
-    #loss_mask = drop(loss_mask, skip_channels=True)
-    #position_ids = drop(position_ids, skip_channels=True)
     return tokens, labels, loss_mask, attention_mask, position_ids
 
 def loss_func(loss_mask, output_tensor):
@@ -163,6 +158,7 @@ def set_device_and_init_torch_dist():
 
 if __name__ == "__main__":
     set_device_and_init_torch_dist()
+    #torch.cuda.set_per_process_memory_fraction(0.5) # 40GB
     pretrain(train_valid_test_datasets_provider,
              model_provider,
              ModelType.encoder_or_decoder,

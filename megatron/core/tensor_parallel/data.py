@@ -8,6 +8,8 @@ from megatron.core.parallel_state import (
     get_tensor_model_parallel_src_rank,
 )
 
+from axonn import axonn as ax
+
 _MAX_DATA_DIM = 5
 
 
@@ -79,7 +81,13 @@ def broadcast_data(keys, data, datatype):
     key_size, key_numel, total_numel = _build_key_size_numel_dictionaries(keys, data)
 
     # Pack on rank zero.
-    if get_tensor_model_parallel_rank() == 0:
+
+
+    process_group = ax.comm_handle.outer_inner_intra_layer_parallel_group
+    src_rank = ax.comm_handle.outer_inner_intra_layer_parallel_group_root
+    rank_in_pg = torch.distributed.get_rank(process_group)
+
+    if rank_in_pg == 0:
         # Check that all keys have the same data type.
         _check_data_types(keys, data, datatype)
         # Flatten the data associated with the keys
@@ -88,8 +96,13 @@ def broadcast_data(keys, data, datatype):
         flatten_data = torch.empty(total_numel, device=torch.cuda.current_device(), dtype=datatype)
 
     # Broadcast
+
+    # Data loader only on rank 0 of each model parallel group.
+    
     torch.distributed.broadcast(
-        flatten_data, get_tensor_model_parallel_src_rank(), group=get_tensor_model_parallel_group()
+        flatten_data, 
+        src_rank, 
+        group=process_group
     )
 
     # Unpack
