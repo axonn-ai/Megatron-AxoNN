@@ -35,9 +35,10 @@ HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=16
+ROW_TENSOR_PARR=4
+DEPTH_TENSOR_PARR=4
 PIPE_PARR=1
+CACHE_LAYERS=32
 OVERLAP=True
 
 NSYS_PROFILE=False
@@ -46,6 +47,7 @@ NSYS_PROFILE=False
 MICRO_BATCH_SIZE=16
 GLOBAL_BATCH_SIZE=16
 SEQUENCE_LENGTH=2048
+TRAIN_ITERS=1000
 
 #OUTPUT_FOLDER="./logs/seq_len"
 #OUTPUT_FILE="${OUTPUT_FOLDER}/TP-${COLUMN_TENSOR_PARR}x${ROW_TENSOR_PARR}x${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-overlap-${OVERLAP}-seq-length-${SEQUENCE_LENGTH}"
@@ -64,7 +66,7 @@ GPT_ARGS="
     --micro-batch-size ${MICRO_BATCH_SIZE} \
     --global-batch-size ${GLOBAL_BATCH_SIZE} \
     --lr 0.00015 \
-    --train-iters 10 \
+    --train-iters ${TRAIN_ITERS} \
     --lr-decay-iters 320000 \
     --lr-decay-style cosine \
     --min-lr 1.0e-5 \
@@ -83,7 +85,7 @@ then
 		--overlap-axonn-comm \
 		--overlap-axonn-reduce-scatter \
 		--overlap-axonn-all-gather\
-		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather 2"
+		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
 fi
 
 		#--cache-weights-in-depth-tensor-parallelism \
