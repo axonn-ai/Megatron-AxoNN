@@ -1065,7 +1065,7 @@ class ParallelTransformerLayer(MegatronModule):
         torch.cuda.nvtx.range_push(f"Transformer Layer {self.layer_number}")
         # Layer norm at the beginning of the transformer layer.
         if self.is_first_layer:
-            hidden_states = drop(hidden_states, batch_dim=1, skip_batch=True)
+            hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
         norm_output = self.input_norm(hidden_states)
 
         # Self attention.
@@ -1187,7 +1187,7 @@ class ParallelTransformerLayer(MegatronModule):
             return output, retriever_output
         else:
             if self.is_last_layer:
-                output = gather(output, batch_dim=1, skip_batch=True)
+                output = gather(output, batch_dim=1, skip_batch=False)
             return output
 
 
