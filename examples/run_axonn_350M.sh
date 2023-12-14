@@ -34,12 +34,14 @@ HIDDEN_SIZE=1024
 NUM_HEADS=16
 
 ## PARALLELISM DETAILS
-COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=4
+COLUMN_TENSOR_PARR=2
+ROW_TENSOR_PARR=2
+DEPTH_TENSOR_PARR=2
+PIPE_PARR=1
+CACHE_LAYERS=12
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=8
+MICRO_BATCH_SIZE=16
 GLOBAL_BATCH_SIZE=16
 SEQUENCE_LENGTH=1024
 
@@ -65,15 +67,24 @@ GPT_ARGS="
     --lr-warmup-fraction .01 \
     --clip-grad 1.0 \
     --fp16 \
+    --recompute-granularity full \
+    --recompute-method uniform \
+    --recompute-num-layers 1 
 "
+
+
 
 
 if [[ $OVERLAP == "True" ]]
 then
 	GPT_ARGS="${GPT_ARGS} \
 		--overlap-axonn-comm \
-		--cache-weights-in-depth-tensor-parallelism"
+		--overlap-axonn-reduce-scatter \
+		--overlap-axonn-all-gather\
+		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
 fi
+
+
 
 DATA_ARGS="
     --data-path $DATA_PATH \
