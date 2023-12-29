@@ -83,7 +83,7 @@ class ParallelMLP(MegatronModule):
         args = get_args()
 
         self.add_bias = config.add_bias_linear
-        self.cache_weights_in_all_gather = (layer_number <= args.num_layers_for_caching_weights_in_depth_tensor_parallel_all_gather)
+        self.cache_weights_in_all_gather = False #(layer_number <= args.num_layers_for_caching_weights_in_depth_tensor_parallel_all_gather)
 
         ffn_hidden_size = config.ffn_hidden_size
         if config.gated_linear_unit:
@@ -719,7 +719,7 @@ class ParallelAttention(MegatronModule):
         # Output. [sq, b, h]
         # =================
 
-        output, bias = self.dense(context_layer, scatter_input=False, gather_output=False, cache_weights_in_all_gather=self.cache_weights_in_all_gather)
+        output, bias = self.dense(context_layer, scatter_input=False, gather_output=False, cache_weights_in_all_gather=False)
         torch.cuda.nvtx.range_pop()
         return output, bias
 
