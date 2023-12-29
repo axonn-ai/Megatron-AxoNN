@@ -1,4 +1,9 @@
 #!/bin/bash
+#SBATCH --qos=regular
+#SBATCH --constraint=gpu
+#SBATCH --gpus-per-node=4
+#SBATCH --account=m2404_g
+#SBATCH --ntasks-per-node=4
 
 # Runs the "345M" parameter model
 
@@ -35,19 +40,20 @@ HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=4
-DEPTH_TENSOR_PARR=4
+ROW_TENSOR_PARR=1
+DEPTH_TENSOR_PARR=16
 PIPE_PARR=1
-CACHE_LAYERS=32
-OVERLAP=True
+CACHE_LAYERS=0
+OVERLAP="True"
 
-NSYS_PROFILE=False
+NSYS_PROFILE="True"
+NSYS_OUTPUT_FILE="nsys_output.qdrep"
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=16
-GLOBAL_BATCH_SIZE=16
+MICRO_BATCH_SIZE=32
+GLOBAL_BATCH_SIZE=32
 SEQUENCE_LENGTH=2048
-TRAIN_ITERS=1000
+TRAIN_ITERS=10
 
 #OUTPUT_FOLDER="./logs/seq_len"
 #OUTPUT_FILE="${OUTPUT_FOLDER}/TP-${COLUMN_TENSOR_PARR}x${ROW_TENSOR_PARR}x${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-overlap-${OVERLAP}-seq-length-${SEQUENCE_LENGTH}"
@@ -94,7 +100,7 @@ DATA_ARGS="
     --data-path $DATA_PATH \
     --vocab-file $VOCAB_FILE \
     --merge-file $MERGE_FILE \
-    --split 949,50,1
+    --split 950,49,1
 "
 
 OUTPUT_ARGS="
@@ -117,7 +123,7 @@ if [[ ${NSYS_PROFILE} == "True" ]]
 then
 	echo "profiling with nsys"
 	SCRIPT="nsys profile -s none \
-		-t nvtx,cuda -o test.qdrep \
+		-t nvtx,cuda -o ${NSYS_OUTPUT_FILE} \
 		--force-overwrite=true  \
 		--capture-range=cudaProfilerApi \
 		--capture-range-end=stop \

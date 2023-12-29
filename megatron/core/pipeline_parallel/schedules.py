@@ -343,6 +343,7 @@ def forward_backward_no_pipelining(
         ctx = nullcontext
 
     def post_process():
+        return
         if args.overlap_axonn_reduce_scatter:
             for param in model.parameters():
                 if param.requires_grad:
