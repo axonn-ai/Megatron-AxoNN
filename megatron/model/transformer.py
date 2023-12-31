@@ -417,7 +417,8 @@ class ParallelAttention(MegatronModule):
         self.attn_mask_type = attn_mask_type
         self.params_dtype = config.params_dtype
         self.sequence_parallel = config.sequence_parallel
-        self.cache_weights_in_all_gather = (self.layer_number <= args.num_layers_for_caching_weights_in_depth_tensor_parallel_all_gather)
+        self.cache_weights_in_all_gather = (self.layer_number <= args.num_layers_for_caching_weights_in_depth_tensor_parallel_all_gather 
+                                            and (self.layer_number - 1)%config.recompute_num_layers == 0)
 
         self.group_query_attention = args.group_query_attention
         self.num_query_groups = args.num_query_groups
@@ -465,6 +466,7 @@ class ParallelAttention(MegatronModule):
                     out_features=query_projection_size + 2 * kv_projection_size,
                     skip_bias_add=True,
                     init_method=config.init_method)
+            self.query_key_value.bias.requires_grad = False
         else:
             raise NotImplementedError
             assert attention_type == AttnType.cross_attn
@@ -1064,8 +1066,8 @@ class ParallelTransformerLayer(MegatronModule):
         # hidden_states: [s, b, h]
         torch.cuda.nvtx.range_push(f"Transformer Layer {self.layer_number}")
         # Layer norm at the beginning of the transformer layer.
-        if self.is_first_layer:
-            hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
+        #if self.is_first_layer:
+        #    hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
         norm_output = self.input_norm(hidden_states)
 
         # Self attention.
@@ -1186,8 +1188,8 @@ class ParallelTransformerLayer(MegatronModule):
         if self.layer_type == LayerType.retro_decoder_with_retriever:
             return output, retriever_output
         else:
-            if self.is_last_layer:
-                output = gather(output, batch_dim=1, skip_batch=False)
+            #if self.is_last_layer:
+            #    output = gather(output, batch_dim=1, skip_batch=False)
             return output
 
 
@@ -1636,7 +1638,9 @@ class ParallelTransformer(MegatronModule):
             requires_grad=True,
             keep_graph=True,
         )
-
+        
+        hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
+        
         # RNG context.
         if self.sequence_parallel:
             rng_context = tensor_parallel.get_cuda_rng_tracker().fork()
@@ -1705,6 +1709,7 @@ class ParallelTransformer(MegatronModule):
                 if torch.is_grad_enabled() and self.training:
                     self.microbatch_count += 1
 
+        hidden_states = gather(hidden_states, batch_dim=1, skip_batch=False)
         # Final layer norm.
         if self.post_process and self.post_norm:
             hidden_states = self.final_norm(hidden_states)

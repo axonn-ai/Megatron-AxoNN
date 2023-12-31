@@ -387,7 +387,7 @@ def forward_backward_no_pipelining(
         if not forward_only:
             backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
  
-    sync_gradients(model.module.module.language_model.encoder, gradient_attr_name="main_grad")
+    #sync_gradients(model.module.module.language_model.encoder, gradient_attr_name="main_grad")
     if not forward_only:
         post_process() # need to call this because of the grad hook in megatron-lm
 

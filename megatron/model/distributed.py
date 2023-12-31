@@ -11,6 +11,9 @@ from megatron.core import mpu
 
 from .module import MegatronModule
 
+from axonn.intra_layer import parition_params_for_extra_all_reduce
+
+from axonn import axonn as ax
 
 class MemoryBuffer:
     def __init__(self, numel: int, numel_padded: int, dtype: torch.dtype):
@@ -54,6 +57,8 @@ class Bucket:
         data_parallel_group: torch.distributed.ProcessGroup,
         overlap_grad_reduce: bool,
         use_distributed_optimizer: bool,
+        depth_parallel_all_reduce: bool = False,
+        param_to_name = None
     ):
         # State for bookkeeping: params is the set of parameters this bucket is
         # responsible for, params_with_grad is the set of parameters with grads
@@ -67,9 +72,11 @@ class Bucket:
         self.data_parallel_group = data_parallel_group
         self.overlap_grad_reduce = overlap_grad_reduce
         self.use_distributed_optimizer = use_distributed_optimizer
+        self.param_to_name = param_to_name
 
         self.data_parallel_world_size = torch.distributed.get_world_size(group=data_parallel_group)
         self.data_parallel_rank = torch.distributed.get_rank(group=data_parallel_group)
+        self.depth_parallel_all_reduce = depth_parallel_all_reduce
 
         self.reset()
 
@@ -97,9 +104,14 @@ class Bucket:
                 async_op=self.overlap_grad_reduce,
             )
         else:
-            self.communication_handle = torch.distributed.all_reduce(
-                self.data, group=self.data_parallel_group, async_op=self.overlap_grad_reduce
-            )
+            if self.depth_parallel_all_reduce:
+                self.communication_handle = torch.distributed.all_reduce(
+                    self.data, group=ax.comm_handle.depth_intra_layer_parallel_group, async_op=self.overlap_grad_reduce
+                )
+            else:
+                self.communication_handle = torch.distributed.all_reduce(
+                    self.data, group=self.data_parallel_group, async_op=self.overlap_grad_reduce
+                )
         self.communication_issued = True
 
     def set(self, param: torch.nn.Parameter):
@@ -140,6 +152,7 @@ class GradBuffer(MemoryBuffer):
         param_to_name: Dict[torch.nn.Parameter, str],
         overlap_grad_reduce: bool,
         use_distributed_optimizer: bool,
+        depth_parallel_all_reduce: bool = False,
     ):
         super(GradBuffer, self).__init__(numel, numel_padded, dtype)
 
@@ -175,6 +188,8 @@ class GradBuffer(MemoryBuffer):
                 data_parallel_group,
                 self.overlap_grad_reduce,
                 self.use_distributed_optimizer,
+                depth_parallel_all_reduce,
+                param_to_name,
             )
             self.buckets.append(bucket)
             for bucket_param in bucket_params:
@@ -317,6 +332,8 @@ class DistributedDataParallel(DistributedDataParallelBase):
         # Set bucket_size to infinity if overlap_grad_reduce is False.
         self.overlap_grad_reduce = overlap_grad_reduce
         self.use_distributed_optimizer = use_distributed_optimizer
+        if use_distributed_optimizer:
+            raise NotImplementedError
 
         if not self.overlap_grad_reduce:
             bucket_size = None
@@ -330,50 +347,65 @@ class DistributedDataParallel(DistributedDataParallelBase):
         # Group parameters by their gradient type.
         grad_dtype_to_params = {}
         grad_dtype_to_numel = {}
-        param_to_name = {}
+        param_to_name = {}, {}
+
+        params_for_extra_all_reduce, _ = parition_params_for_extra_all_reduce(module.module.language_model.encoder)
+        params_for_extra_all_reduce = set(params_for_extra_all_reduce)
+        
         for name, param in self.module.named_parameters():
             if param.requires_grad:
                 param.grad_added_to_main_grad = False
-                param_to_name[param] = name
-                dtype = torch.float if accumulate_allreduce_grads_in_fp32 else param.dtype
 
-                params = grad_dtype_to_params.get(dtype, [])
+                depth_parallel_all_reduce = False
+                if param in params_for_extra_all_reduce:
+                    depth_parallel_all_reduce = True
+            
+                param_to_name[int(depth_parallel_all_reduce)][param] = name
+                
+                dtype = torch.float if accumulate_allreduce_grads_in_fp32 else param.dtype
+                params = grad_dtype_to_params.get((dtype, depth_parallel_all_reduce), [])
                 params.append(param)
-                grad_dtype_to_params[dtype] = params
+                grad_dtype_to_params[(dtype, depth_parallel_all_reduce)] = params
 
                 # Calculate number of elements per dtype.
-                grad_dtype_to_numel[dtype] = (
-                    grad_dtype_to_numel.get(dtype, 0) + param.data.nelement()
+                grad_dtype_to_numel[(dtype, depth_parallel_all_reduce)] = (
+                    grad_dtype_to_numel.get((dtype, depth_parallel_all_reduce), 0) + param.data.nelement()
                 )
 
         # Allocate the grad buffers and map the grads.
         # The grad buffer under the hood creates buckets as appropriate, depending on
         # whether overlap_grad_reduce is True or not.
-        data_parallel_world_size = torch.distributed.get_world_size(group=data_parallel_group)
-        for dtype, params in grad_dtype_to_params.items():
+
+        for key, params in grad_dtype_to_params.items():
             # Pad so size is divisible by the data parallel size.
-            numel = grad_dtype_to_numel[dtype]
+            dtype, depth_parallel_all_reduce = key
+            data_parallel_world_size = torch.distributed.get_world_size(group=data_parallel_group)
+            if depth_parallel_all_reduce:
+                depth_group = ax.comm_handle.depth_intra_layer_parallel_group
+                data_parallel_world_size *= torch.distributed.get_world_size(group=depth_group)
+            numel = grad_dtype_to_numel[(dtype, depth_parallel_all_reduce)]
             numel_padded = (
                 int(math.ceil(numel / data_parallel_world_size)) * data_parallel_world_size
             )
 
-            self.grad_buffers[dtype] = GradBuffer(
+            self.grad_buffers[(dtype, depth_parallel_all_reduce)] = GradBuffer(
                 numel,
                 numel_padded,
                 dtype,
                 params,
                 data_parallel_group,
                 bucket_size,
-                param_to_name,
+                param_to_name[int(depth_parallel_all_reduce)],
                 self.overlap_grad_reduce,
                 self.use_distributed_optimizer,
+                depth_parallel_all_reduce
             )
 
             # Parameters are laid out in the corresponding grad_buffer in reverse
             # order, so count indices from the back.
-            index = grad_dtype_to_numel[dtype]
+            index = grad_dtype_to_numel[(dtype, depth_parallel_all_reduce)]
             for param in params:
-                self.param_to_grad_buffer[param] = self.grad_buffers[dtype]
+                self.param_to_grad_buffer[param] = self.grad_buffers[(dtype, depth_parallel_all_reduce)]
                 if dtype not in self.grad_buffer_param_index_map:
                     self.grad_buffer_param_index_map[dtype] = {}
 
@@ -382,7 +414,7 @@ class DistributedDataParallel(DistributedDataParallelBase):
                 self.grad_buffer_param_index_map[dtype][param] = (
                     index,
                     index + param.data.nelement(),
-                    self.grad_buffers[dtype].param_to_bucket_index[param],
+                    self.grad_buffers[(dtype, depth_parallel_all_reduce)].param_to_bucket_index[param],
                 )
 
         # Register backward hook.

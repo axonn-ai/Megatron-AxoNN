@@ -178,7 +178,7 @@ def validate_args(args, defaults={}):
 
     # Overlapping grad reduce only supported without pipeline parallelism right now.
     if args.overlap_grad_reduce:
-        raise ValueError(f"Megatron-AxoNN does not support --overlap-grad-reduce")
+        #raise ValueError(f"Megatron-AxoNN does not support --overlap-grad-reduce")
         assert args.pipeline_model_parallel_size == 1
 
     if args.dataloader_type is None:
