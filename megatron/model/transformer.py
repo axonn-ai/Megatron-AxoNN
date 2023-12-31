@@ -83,7 +83,7 @@ class ParallelMLP(MegatronModule):
         args = get_args()
 
         self.add_bias = config.add_bias_linear
-        self.cache_weights_in_all_gather = False #(layer_number <= args.num_layers_for_caching_weights_in_depth_tensor_parallel_all_gather)
+        self.cache_weights_in_all_gather = args.depth_tensor_weight_caching_level == 2
 
         ffn_hidden_size = config.ffn_hidden_size
         if config.gated_linear_unit:
@@ -417,8 +417,13 @@ class ParallelAttention(MegatronModule):
         self.attn_mask_type = attn_mask_type
         self.params_dtype = config.params_dtype
         self.sequence_parallel = config.sequence_parallel
-        self.cache_weights_in_all_gather = (self.layer_number <= args.num_layers_for_caching_weights_in_depth_tensor_parallel_all_gather 
-                                            and (self.layer_number - 1)%config.recompute_num_layers == 0)
+        self.cache_weights_in_all_gather_for_qkv = False
+        if args.depth_tensor_weight_caching_level == 2:
+            self.cache_weights_in_all_gather_for_qkv = True
+        elif args.depth_tensor_weight_caching_level == 1 and ((self.layer_number - 1) % args.recompute_num_layers == 0):
+            self.cache_weights_in_all_gather_for_qkv = True
+
+        self.cache_weights_in_all_gather_for_dense = args.depth_tensor_weight_caching_level == 2
 
         self.group_query_attention = args.group_query_attention
         self.num_query_groups = args.num_query_groups
@@ -576,7 +581,7 @@ class ParallelAttention(MegatronModule):
 
             # Attention heads [sq, b, h] --> [sq, b, ng * (np/ng + 2) * hn)]
             mixed_x_layer, _ = self.query_key_value(hidden_states, scatter_input=False, gather_output=False, 
-                                                    cache_weights_in_all_gather=self.cache_weights_in_all_gather)
+                                                    cache_weights_in_all_gather=self.cache_weights_in_all_gather_for_qkv)
 
             # [sq, b, hp] --> [sq, b, ng, (np/ng + 2) * hn]
             new_tensor_shape = mixed_x_layer.size()[:-1] + (
@@ -721,7 +726,10 @@ class ParallelAttention(MegatronModule):
         # Output. [sq, b, h]
         # =================
 
-        output, bias = self.dense(context_layer, scatter_input=False, gather_output=False, cache_weights_in_all_gather=False)
+        output, bias = self.dense(context_layer, 
+                                  scatter_input=False, 
+                                  gather_output=False, 
+                                  cache_weights_in_all_gather=self.cache_weights_in_all_gather_for_dense)
         torch.cuda.nvtx.range_pop()
         return output, bias
 

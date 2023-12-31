@@ -40,18 +40,19 @@ HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=16
+ROW_TENSOR_PARR=4
+DEPTH_TENSOR_PARR=4
 PIPE_PARR=1
-CACHE_LAYERS=32
+CACHE_LEVEL=2
+RECOMPUTE_NUM_LAYERS=1
 OVERLAP="True"
 
 NSYS_PROFILE="True"
 NSYS_OUTPUT_FILE="nsys_output.qdrep"
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=32
-GLOBAL_BATCH_SIZE=32
+MICRO_BATCH_SIZE=16
+GLOBAL_BATCH_SIZE=16
 SEQUENCE_LENGTH=2048
 TRAIN_ITERS=10
 
@@ -83,18 +84,21 @@ GPT_ARGS="
     --use-flash-attn \
     --recompute-granularity full \
     --recompute-method uniform \
-    --recompute-num-layers 1 \
+    --recompute-num-layers ${RECOMPUTE_NUM_LAYERS}	\
 "
+
+GPT_ARGS="${GPT_ARGS} --overlap-grad-reduce"
+
 if [[ $OVERLAP == "True" ]]
 then
 	GPT_ARGS="${GPT_ARGS} \
 		--overlap-axonn-comm \
 		--overlap-axonn-reduce-scatter \
 		--overlap-axonn-all-gather\
-		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
+		--depth-tensor-weight-caching-level ${CACHE_LEVEL}
+	"
 fi
 
-		#--cache-weights-in-depth-tensor-parallelism \
 
 DATA_ARGS="
     --data-path $DATA_PATH \

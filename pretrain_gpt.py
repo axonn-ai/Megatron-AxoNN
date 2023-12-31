@@ -158,6 +158,7 @@ def set_device_and_init_torch_dist():
 
 if __name__ == "__main__":
     set_device_and_init_torch_dist()
+    torch.cuda.set_per_process_memory_fraction(0.5)
     pretrain(train_valid_test_datasets_provider,
              model_provider,
              ModelType.encoder_or_decoder,
