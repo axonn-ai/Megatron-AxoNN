@@ -31,7 +31,7 @@ DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 ## ARCHITECTURE DETAILS
 NUM_LAYERS=32
 NUM_HEADS=56
-HIDDEN_SIZE=7168 #$(( 128 * NUM_HEADS ))
+HIDDEN_SIZE=7168 
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
@@ -41,17 +41,13 @@ PIPE_PARR=1
 CACHE_LAYERS=32
 OVERLAP=True
 
-NSYS_PROFILE=True
+NSYS_PROFILE=False
 
 ## BATCH SIZES
 MICRO_BATCH_SIZE=16
 GLOBAL_BATCH_SIZE=16
 SEQUENCE_LENGTH=2048
 TRAIN_ITERS=1000
-
-#OUTPUT_FOLDER="./logs/seq_len"
-#OUTPUT_FILE="${OUTPUT_FOLDER}/TP-${COLUMN_TENSOR_PARR}x${ROW_TENSOR_PARR}x${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-overlap-${OVERLAP}-seq-length-${SEQUENCE_LENGTH}"
-mkdir -p ${OUTPUT_FOLDER}
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -88,7 +84,6 @@ then
 		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
 fi
 
-		#--cache-weights-in-depth-tensor-parallelism \
 
 DATA_ARGS="
     --data-path $DATA_PATH \
@@ -128,11 +123,11 @@ then
 		"
 fi
 
-
+# add these args if you want to save and load checkpoints
 #--save $CHECKPOINT_PATH \
 # --load $CHECKPOINT_PATH
 
-run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}" #| tee ${OUTPUT_FILE}"
+run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}" 
 
 echo ${run_cmd}
 eval ${run_cmd}
