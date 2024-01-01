@@ -66,13 +66,14 @@ GPT_ARGS="
     --weight-decay 1e-2 \
     --lr-warmup-fraction .01 \
     --clip-grad 1.0 \
-    --fp16 \
+    --bf16 \
     --recompute-granularity full \
     --recompute-method uniform \
-    --recompute-num-layers 1 
+    --recompute-num-layers 1 \
 "
 
 
+    #--loss-scale 2048
 
 
 if [[ $OVERLAP == "True" ]]

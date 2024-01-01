@@ -679,14 +679,16 @@ class ParallelAttention(MegatronModule):
         # ==================================
 
         # expand the key_layer and value_layer [sk, b, ng, hn] -> [sk, b, np, hn]
-        key_layer = key_layer.repeat_interleave(
-            self.num_attention_heads_per_partition // self.num_query_groups_per_partition,
-            dim = 2
-        )
-        value_layer = value_layer.repeat_interleave(
-            self.num_attention_heads_per_partition // self.num_query_groups_per_partition,
-            dim = 2
-        )
+        repeats = self.num_attention_heads_per_partition // self.num_query_groups_per_partition
+        if repeats > 1:
+            key_layer = key_layer.repeat_interleave(
+                repeats,
+                dim = 2
+            )
+            value_layer = value_layer.repeat_interleave(
+                repeats,
+                dim = 2
+            )
 
         # apply relative positional encoding (rotary embedding)
         if rotary_pos_emb is not None:
@@ -1064,8 +1066,8 @@ class ParallelTransformerLayer(MegatronModule):
         # hidden_states: [s, b, h]
         torch.cuda.nvtx.range_push(f"Transformer Layer {self.layer_number}")
         # Layer norm at the beginning of the transformer layer.
-        if self.is_first_layer:
-            hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
+        #if self.is_first_layer:
+        #    hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
         norm_output = self.input_norm(hidden_states)
 
         # Self attention.
@@ -1186,8 +1188,8 @@ class ParallelTransformerLayer(MegatronModule):
         if self.layer_type == LayerType.retro_decoder_with_retriever:
             return output, retriever_output
         else:
-            if self.is_last_layer:
-                output = gather(output, batch_dim=1, skip_batch=False)
+            #if self.is_last_layer:
+            #    output = gather(output, batch_dim=1, skip_batch=False)
             return output
 
 
@@ -1501,7 +1503,11 @@ class ParallelTransformer(MegatronModule):
 
         if self.post_process and self.post_norm:
             # Final layer norm before output.
+            original_hidden_size = config.hidden_size
+            config.hidden_size = core.utils.divide(original_hidden_size, 
+                                                   args.column_tensor_model_parallel_size)
             self.final_norm = get_norm(config)
+            config.hidden_size = original_hidden_size
 
     def _get_layer(self, layer_number):
         return self.layers[layer_number]
@@ -1616,6 +1622,7 @@ class ParallelTransformer(MegatronModule):
             # See set_input_tensor()
             hidden_states = self.input_tensor
 
+        hidden_states = drop(hidden_states, batch_dim=1, skip_batch=False)
         # Viewless tensor.
         # - We only need to create a viewless tensor in the case of micro batch
         #   size (mbs) == 1, since in this case, 'hidden_states.transpose()'
@@ -1709,6 +1716,7 @@ class ParallelTransformer(MegatronModule):
         if self.post_process and self.post_norm:
             hidden_states = self.final_norm(hidden_states)
 
+        hidden_states = gather(hidden_states, batch_dim=1, skip_batch=False)
         return hidden_states
 
     def load_state_dict(self, state_dict, strict=True):

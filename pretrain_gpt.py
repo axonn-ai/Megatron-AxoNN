@@ -99,9 +99,22 @@ def forward_step(data_iterator, model):
     tokens, labels, loss_mask, attention_mask, position_ids = get_batch(
         data_iterator)
     timers('batch-generator').stop()
-
-    output_tensor = model(tokens, position_ids, attention_mask,
-                          labels=labels)
+    
+    from axonn.intra_layer import optimize_communication
+    from contextlib import nullcontext
+    
+    if args.overlap_axonn_comm:
+        ctx = partial(optimize_communication, 
+                      overlap_all_reduce=True, 
+                      overlap_reduce_scatter=args.overlap_axonn_reduce_scatter, 
+                      overlap_all_gather=args.overlap_axonn_all_gather, 
+                      model_object_for_overlapping_allgathers=model
+                      )
+    else:
+        ctx = nullcontext
+    with ctx():
+        output_tensor = model(tokens, position_ids, attention_mask,
+                              labels=labels)
 
     return output_tensor, partial(loss_func, loss_mask)
 

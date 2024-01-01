@@ -352,18 +352,19 @@ def forward_backward_no_pipelining(
 
     with no_sync_func():
         for i in range(num_microbatches - 1):
-            with ctx():#axonn.intra_layer.optimize_communication(False):
-                output_tensor = forward_step(
-                    forward_step_func,
-                    data_iterator,
-                    model,
-                    num_microbatches,
-                    input_tensor,
-                    forward_data_store,
-                    config,
-                    collect_non_loss_data,
-                )
-                if not forward_only:
+            output_tensor = forward_step(
+                forward_step_func,
+                data_iterator,
+                model,
+                num_microbatches,
+                input_tensor,
+                forward_data_store,
+                config,
+                collect_non_loss_data,
+            )
+
+            if not forward_only:
+                with ctx():
                     backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
                 
             if not forward_only:
@@ -371,22 +372,26 @@ def forward_backward_no_pipelining(
 
     # Run computation for last microbatch out of context handler (want to
     # synchronize gradients).
-    with ctx():#axonn.intra_layer.optimize_communication(False):
-        output_tensor = forward_step(
-            forward_step_func,
-            data_iterator,
-            model,
-            num_microbatches,
-            input_tensor,
-            forward_data_store,
-            config,
-            collect_non_loss_data,
-        )
+    #with ctx():#axonn.intra_layer.optimize_communication(False):
+    output_tensor = forward_step(
+        forward_step_func,
+        data_iterator,
+        model,
+        num_microbatches,
+        input_tensor,
+        forward_data_store,
+        config,
+        collect_non_loss_data,
+    )
 
-        if not forward_only:
+    if not forward_only:
+        with ctx():    
             backward_step(input_tensor, output_tensor, output_tensor_grad, model_type, config)
  
-    sync_gradients(model.module.module.language_model.encoder, gradient_attr_name="main_grad")
+    sync_gradients(model.module.module.language_model.encoder, 
+                   gradient_attr_name="main_grad",
+                   vectorize=False)
+    # for some reason vectorize does not work with torch.float16
     if not forward_only:
         post_process() # need to call this because of the grad hook in megatron-lm
 
