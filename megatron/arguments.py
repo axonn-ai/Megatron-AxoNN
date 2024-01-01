@@ -999,7 +999,7 @@ def _add_distributed_args(parser):
     group.add_argument('--depth-tensor-model-parallel-size', type=int, default=1,
                        help='Degree of tensor model parallelism.')
     group.add_argument('--overlap-axonn-comm', action='store_true', default=False,
-                       help='Overlap all-reduces in backward pass ofAxoNN\'s tensor parallelism')
+                       help='Overlap all-reduces in backward pass of AxoNN\'s tensor parallelism')
     group.add_argument('--overlap-axonn-reduce-scatter', action='store_true', default=False,
                        help='Overlap reduce scatters in backward pass of AxoNN\'s tensor parallelism')
     group.add_argument('--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather', type=int, default=0,
