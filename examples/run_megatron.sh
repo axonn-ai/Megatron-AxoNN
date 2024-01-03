@@ -29,28 +29,26 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=24
-HIDDEN_SIZE=1024
-NUM_HEADS=16
+NUM_LAYERS=30
+NUM_HEADS=44
+HIDDEN_SIZE=$(( 128 * NUM_HEADS ))
 
 ## PARALLELISM DETAILS
-COLUMN_TENSOR_PARR=2
-ROW_TENSOR_PARR=2
-DEPTH_TENSOR_PARR=2
-PIPE_PARR=1
-CACHE_LAYERS=12
+TENSOR_PARR=4
+PIPE_PARR=2
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=16
-GLOBAL_BATCH_SIZE=16
-SEQUENCE_LENGTH=1024
+MICRO_BATCH_SIZE=1
+GLOBAL_BATCH_SIZE=4
+SEQUENCE_LENGTH=8192
 
-OVERLAP="True"
+OUTPUT_FOLDER="./logs/seq_len/megatron"
+OUTPUT_FILE="${OUTPUT_FOLDER}/${DEPTH_TENSOR_PARR}_PP-${PIPE_PARR}_mbs-${MICRO_BATCH_SIZE}-bs-${GLOBAL_BATCH_SIZE}-seq-length-${SEQUENCE_LENGTH}"
+mkdir -p ${OUTPUT_FOLDER}
 
 GPT_ARGS="
-    --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
-    --column-tensor-model-parallel-size ${COLUMN_TENSOR_PARR} \
-    --depth-tensor-model-parallel-size ${DEPTH_TENSOR_PARR} \
+    --tensor-model-parallel-size ${TENSOR_PARR} \
+    --pipeline-model-parallel-size ${PIPE_PARR} \
     --num-layers ${NUM_LAYERS} \
     --hidden-size ${HIDDEN_SIZE} \
     --num-attention-heads ${NUM_HEADS} \
@@ -59,31 +57,19 @@ GPT_ARGS="
     --micro-batch-size ${MICRO_BATCH_SIZE} \
     --global-batch-size ${GLOBAL_BATCH_SIZE} \
     --lr 0.00015 \
-    --train-iters 500000 \
+    --train-iters 10 \
     --lr-decay-iters 320000 \
     --lr-decay-style cosine \
     --min-lr 1.0e-5 \
     --weight-decay 1e-2 \
     --lr-warmup-fraction .01 \
     --clip-grad 1.0 \
-    --fp16 \
+    --bf16 \
+    --use-flash-attn \
     --recompute-granularity full \
     --recompute-method uniform \
     --recompute-num-layers 1 \
 "
-
-
-    #--loss-scale 2048
-
-
-if [[ $OVERLAP == "True" ]]
-then
-	GPT_ARGS="${GPT_ARGS} \
-		--overlap-axonn-comm \
-		--overlap-axonn-reduce-scatter \
-		--overlap-axonn-all-gather\
-		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
-fi
 
 
 
@@ -98,7 +84,7 @@ OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 10000 \
     --eval-interval 1000 \
-    --eval-iters 10
+    --eval-iters 1
 "
 
 SCRIPT="python -u pretrain_gpt.py \
@@ -106,12 +92,12 @@ SCRIPT="python -u pretrain_gpt.py \
     $DATA_ARGS \
     $OUTPUT_ARGS \
     --distributed-backend nccl \
-    --save $CHECKPOINT_PATH \
-    --load $CHECKPOINT_PATH
 "
 
+#--save $CHECKPOINT_PATH \
+# --load $CHECKPOINT_PATH
 
-run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}"
+run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT} | tee ${OUTPUT_FILE}"
 
 echo ${run_cmd}
 eval ${run_cmd}

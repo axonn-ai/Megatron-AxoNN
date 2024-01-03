@@ -11,7 +11,6 @@ from megatron.core import mpu
 
 from .module import MegatronModule
 
-
 class MemoryBuffer:
     def __init__(self, numel: int, numel_padded: int, dtype: torch.dtype):
         self.numel = numel

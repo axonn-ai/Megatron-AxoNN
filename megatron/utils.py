@@ -25,7 +25,7 @@ from megatron.core.tensor_parallel import param_is_not_tensor_parallel_duplicate
 from megatron.model import DistributedDataParallel as DDP
 from megatron.model import Float16Module
 from megatron.model.module import param_is_not_shared
-
+from axonn import axonn as ax
 
 ALL_MODULE_WRAPPER_CLASSNAMES = (DDP, Float16Module)
 
