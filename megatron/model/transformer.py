@@ -1719,9 +1719,6 @@ class ParallelTransformer(MegatronModule):
 
         hidden_states = gather(hidden_states, batch_dim=1, skip_batch=True)
 
-        rank = torch.distributed.get_rank()
-        output = hidden_states.view(-1)[:10]
-
         return hidden_states
 
     def load_state_dict(self, state_dict, strict=True):
