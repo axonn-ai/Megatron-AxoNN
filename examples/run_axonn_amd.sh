@@ -1,4 +1,7 @@
 #!/bin/bash
+#SBATCH -p batch
+#SBATCH -A CSC547
+#SBATCH -t 00:20:00
 
 # Runs the "345M" parameter model
 
@@ -7,18 +10,20 @@ module load cray-python
 module load amd-mixed/5.6.0 #this should match with the rocm version your pytorch uses
 
 ## these lines enable CUDA aware MPI
-module load craype-accel-amd-gfx90a
+#module load craype-accel-amd-gfx90a
 export MPICH_GPU_SUPPORT_ENABLED=0
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CRAY_MPICH_ROOTDIR}/gtl/lib"
-
+#export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CRAY_MPICH_ROOTDIR}/gtl/lib"
 ## this enables the slingshot-11 plugin for RCCL (crucial for inter-node bw)
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/lustre/orion/scratch/ssingh37/csc547/aws-ofi-rccl/build/lib"
 #export NCCL_DEBUG=INFO
 export FI_CXI_ATS=0
-
+export HSA_FORCE_FINE_GRAIN_PCIE=1
+#export NCCL_SOCKET_IFNAME=hsn
+# super important
+#export NCCL_NET_GDR_LEVEL=4
+#export NCCL_P2P_LEVEL=4
 ## this improves cross node bandwidth for some cases
 export NCCL_CROSS_NIC=1
-
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 NNODES=$SLURM_JOB_NUM_NODES
@@ -31,29 +36,53 @@ export MASTER_PORT=29500
 # data/checkpoint args
 DATA_DIR="/lustre/orion/csc547/proj-shared/parallel_deep_learning/book_corpus"
 
-
 CHECKPOINT_PATH="${DATA_DIR}/checkpoints"
 VOCAB_FILE="${DATA_DIR}/gpt2-vocab.json"
 MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
+
 ## ARCHITECTURE DETAILS
+#
+#
+# 5B
+NUM_LAYERS=24
+NUM_HEADS=32
+HIDDEN_SIZE=4096
+#
+# 10B
+#NUM_LAYERS=32
+#NUM_HEADS=40
+#HIDDEN_SIZE=5120
+
 # 20B
-NUM_LAYERS=32
-HIDDEN_SIZE=7168
-NUM_HEADS=56
+#NUM_LAYERS=32
+#NUM_HEADS=56
+#HIDDEN_SIZE=7168
 
 # 40B
-NUM_LAYERS=38
-HIDDEN_SIZE=9216
-NUM_HEADS=72
+#NUM_LAYERS=38
+#NUM_HEADS=72
+#HIDDEN_SIZE=9216
+#
+# 80B
+#NUM_LAYERS=42
+#NUM_HEADS=96
+#HIDDEN_SIZE=12288
+#
+
+# 160B
+#NUM_LAYERS=84
+#NUM_HEADS=96
+#HIDDEN_SIZE=12288
 
 ## PARALLELISM DETAILS
+#
+ROW_TENSOR_PARR=1
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=2
-DEPTH_TENSOR_PARR=256
+DEPTH_TENSOR_PARR=512
 PIPE_PARR=1
-CACHE_LAYERS=25
+CACHE_LAYERS=24
 OVERLAP=True
 
 ## BATCH SIZES
@@ -61,6 +90,9 @@ MICRO_BATCH_SIZE=2048
 GLOBAL_BATCH_SIZE=2048
 SEQUENCE_LENGTH=2048
 TRAIN_ITERS=10
+
+
+config="r-${ROW_TENSOR_PARR}-c-${COLUMN_TENSOR_PARR}-d-${DEPTH_TENSOR_PARR}-g-${GPUS}"
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
