@@ -9,6 +9,7 @@ NNODES=$SLURM_JOB_NUM_NODES
 GPUS=$(( NNODES * 4 ))
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=29500
+export WORLD_SIZE=${GPUS}
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export NCCL_NET_GDR_LEVEL=PHB
 export CUDA_DEVICE_MAX_CONNECTIONS=1
@@ -29,26 +30,41 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=30
+NUM_LAYERS=32
 NUM_HEADS=40
 HIDDEN_SIZE=5120
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=8
+ROW_TENSOR_PARR=4
+DEPTH_TENSOR_PARR=2
 PIPE_PARR=1
 CACHE_LAYERS=0
 OVERLAP=True
+TRAIN_ITERS=10
+EVAL_ITERS=1
 
 NSYS_PROFILE=False
-PROFILE_NAME="test_10B_16x1"
+NCU_PROFILE=False
+if [[ ${NCU_PROFILE} == True ]]
+then
+	COLUMN_TENSOR_PARR=1
+	ROW_TENSOR_PARR=1
+	DEPTH_TENSOR_PARR=1
+	PIPE_PARR=1
+	NNODES=1
+	GPUS=1
+	NUM_LAYERS=1
+	TRAIN_ITERS=1
+	EVAL_ITERS=0
+fi
+
+PROFILE_NAME="test_20B_1x1x16"
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=8
-GLOBAL_BATCH_SIZE=16
+MICRO_BATCH_SIZE=4
+GLOBAL_BATCH_SIZE=4
 SEQUENCE_LENGTH=2048
-TRAIN_ITERS=10
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -75,6 +91,7 @@ GPT_ARGS="
     --recompute-granularity full \
     --recompute-method uniform \
     --recompute-num-layers 1 \
+    --layer-caching-level 1
 "
 if [[ $OVERLAP == "True" ]]
 then
@@ -97,7 +114,7 @@ OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 10000 \
     --eval-interval 1000 \
-    --eval-iters 1
+    --eval-iters ${EVAL_ITERS}
 "
 
 
@@ -122,13 +139,17 @@ then
 		--profile-step-end 10 \
 		--profile
 		"
+elif [[ ${NCU_PROFILE} == "True" ]]
+then
+	echo "profiling with ncu"
+	SCRIPT="ncu -f --metrics sm__inst_executed_pipe_tensor.sum,sm__pipe_tensor_cycles_active.sum -o ${PROFILE_NAME} ${SCRIPT}"
 fi
 
 # add these args if you want to save and load checkpoints
 #--save $CHECKPOINT_PATH \
 # --load $CHECKPOINT_PATH
 
-run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ${SCRIPT}" 
+run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ./examples/get_rank_from_slurm.sh ${SCRIPT}" 
 
 echo ${run_cmd}
 eval ${run_cmd}
