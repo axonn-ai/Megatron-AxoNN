@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH -p batch
 #SBATCH -A CSC569
-#SBATCH -o /lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/logs/test.out
 
 echo "This TinyLLAMA script will work for <=512 GPUs."
 
