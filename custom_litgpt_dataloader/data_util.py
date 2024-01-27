@@ -1,11 +1,10 @@
 from lit_gpt.packed_dataset import CombinedDataset, PackedDataset
-from lit_gpt.utils import CycleIterator, chunked_cross_entropy, num_parameters
+from lit_gpt.utils import CycleIterator
 from torch.utils.data import DataLoader
 from pathlib import Path
 from axonn import axonn as ax
 import torch.distributed as dist
 from typing import Tuple, Union, Optional
-from lit_gpt.utils import CycleIterator
 
 data_config = [
     ("train_slimpajama", 69.3584),

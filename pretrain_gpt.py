@@ -1,7 +1,7 @@
 # Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
 
 """Pretrain GPT"""
-
+from mpi4py import MPI
 import os
 import torch
 from functools import partial
@@ -179,9 +179,6 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
 
 
 def set_device_and_init_torch_dist():
-    from mpi4py import MPI
-    import os
-    MPI.Init()
     world_rank = MPI.COMM_WORLD.Get_rank()
     world_size = MPI.COMM_WORLD.Get_size()
 

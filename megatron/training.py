@@ -655,7 +655,7 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[skipped_iters_key])
         log_string += ' number of nan iterations: {:3d} |'.format(
             total_loss_dict[nan_iters_key])
-        #log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s | '.format(get_flops(elapsed_time_per_iteration))
+        log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s | '.format(get_flops(elapsed_time_per_iteration))
         #log_string += ' model size: {:.3f} B params | '.format(get_params())
         curr, peak = get_mem()
         log_string += ' memory used by tensors {:.3f} GB ( peak {:.3f} GB)'.format(curr, peak)

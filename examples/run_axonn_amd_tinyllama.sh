@@ -5,19 +5,28 @@
 
 echo "This TinyLLAMA script will work for <=512 GPUs."
 
-## loading python venv
-module load cray-python
-. /lustre/orion/scratch/ssingh37/csc547/venv_axonn_pt_2.1/bin/activate
+module load PrgEnv-cray
+module load cray-python/3.9.13.1
+. /ccs/home/ssingh37/axonn_venv/bin/activate
 module load amd-mixed/5.6.0 #this should match with the rocm version your pytorch uses
+module load libfabric
 
+## these lines enable CUDA aware MPI
+#module load craype-accel-amd-gfx90a
 export MPICH_GPU_SUPPORT_ENABLED=0
+#export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CRAY_MPICH_ROOTDIR}/gtl/lib"
+## this enables the slingshot-11 plugin for RCCL (crucial for inter-node bw)
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/ccs/home/ssingh37/aws-ofi-rccl/build/lib"
+#export NCCL_DEBUG=INFO
 export FI_CXI_ATS=0
 export HSA_FORCE_FINE_GRAIN_PCIE=1
+#export NCCL_SOCKET_IFNAME=hsn
+# super important
+#export NCCL_NET_GDR_LEVEL=4
+#export NCCL_P2P_LEVEL=4
+## this improves cross node bandwidth for some cases
 export NCCL_CROSS_NIC=1
 export CUDA_DEVICE_MAX_CONNECTIONS=1
-
-## point this to the AWS plugin (you should have compiled this previously)
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/lustre/orion/scratch/ssingh37/csc547/aws-ofi-rccl/build/lib"
 
 NNODES=$SLURM_JOB_NUM_NODES
 GPUS_PER_NODE=8 ## change as per your machine
@@ -87,7 +96,7 @@ GPT_ARGS="
     --global-batch-size ${GLOBAL_BATCH_SIZE} \
     --lr 4.0e-4 \
     --train-iters ${TRAIN_ITERS} \
-    --lr-decay-iters 320000 \
+    --lr-decay-iters ${TRAIN_ITERS} \
     --lr-decay-style cosine \
     --min-lr 4.0e-5 \
     --weight-decay 1e-1 \
