@@ -32,6 +32,7 @@ GPUS_PER_NODE=8 ## change as per your machine
 GPUS=$(( NNODES * GPUS_PER_NODE )) 
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=29500
+export WORLD_SIZE=${GPUS}
 
 
 # these are redundant for tiny-llams, so ignore
@@ -41,7 +42,7 @@ MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
 DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
 
 # we will save and load model checkpoints here
-CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints"
+CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints_2"
 
 #TODO: tensorboard logging
 #TENSORBOARD_DIR="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/logs"
@@ -135,7 +136,8 @@ DATA_ARGS="
     --vocab-file $VOCAB_FILE \
     --merge-file $MERGE_FILE \
     --split 949,50,1 \
-    --custom-dataloader
+    --custom-dataloader \
+    --num-workers 0
 "
 
 
@@ -158,7 +160,7 @@ SCRIPT="python -u pretrain_gpt.py \
 
 export PYTHONPATH="$PYTHONPATH:/lustre/orion/scratch/ssingh37/csc547/lit-gpt-dev"
 export OMP_NUM_THREADS=7 
-run_cmd="srun -N ${NNODES} -n ${GPUS} -c7 --gpus-per-task=1 --gpu-bind=closest ${SCRIPT}" 
+run_cmd="srun -N ${NNODES} -n ${GPUS} -c7 --gpus-per-task=1 --gpu-bind=closest ./examples/get_rank_from_slurm.sh ${SCRIPT}" 
 
 echo ${run_cmd}
 eval ${run_cmd}
