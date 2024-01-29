@@ -2,68 +2,77 @@
 #SBATCH -p batch
 #SBATCH -A CSC569
 
+
+userid=$(whoami)
+# These are the two things you need to change as per your setup
+# 1. Make LD_LIBRARY_PATH point to wherever your plugin is installed
+# this enables the slingshot-11 plugin for RCCL (crucial for inter-node bw)
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/ccs/home/$userid/aws-ofi-rccl/build/lib"
+# 2. Make PYTHONPATH point to your local clone of litgpt
+export PYTHONPATH="$PYTHONPATH:/lustre/orion/scratch/$userid/csc547/lit-gpt-dev"
+
+# The rest of the script should work as it is
+
 echo "This TinyLLAMA script will work for <=512 GPUs."
 
 module load PrgEnv-cray
 module load cray-python/3.9.13.1
-. /ccs/home/ssingh37/axonn_venv/bin/activate
+. /ccs/home/$userid/axonn_venv/bin/activate
 module load amd-mixed/5.6.0 #this should match with the rocm version your pytorch uses
 module load libfabric
 
-## these lines enable CUDA aware MPI
-#module load craype-accel-amd-gfx90a
 export MPICH_GPU_SUPPORT_ENABLED=0
-#export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${CRAY_MPICH_ROOTDIR}/gtl/lib"
-## this enables the slingshot-11 plugin for RCCL (crucial for inter-node bw)
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/ccs/home/ssingh37/aws-ofi-rccl/build/lib"
-#export NCCL_DEBUG=INFO
+
+## some RCCL env variables
 export FI_CXI_ATS=0
 export HSA_FORCE_FINE_GRAIN_PCIE=1
-#export NCCL_SOCKET_IFNAME=hsn
-# super important
-#export NCCL_NET_GDR_LEVEL=4
-#export NCCL_P2P_LEVEL=4
-## this improves cross node bandwidth for some cases
 export NCCL_CROSS_NIC=1
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
+## calculating the number of nodes and GPUs
 NNODES=$SLURM_JOB_NUM_NODES
 GPUS_PER_NODE=8 ## change as per your machine
 GPUS=$(( NNODES * GPUS_PER_NODE )) 
+
+# setting variables for torch.distributed
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=29500
 export WORLD_SIZE=${GPUS}
 
+# train_data_dir and val_data_dir are set to this as of now
+DATADIR="/lustre/orion/csc569/proj-shared/language_datasets/"
+DATASET="spj_star_combined_full_tinyllama_tokd"
+DATAPATH="$DATADIR/$DATASET"
+
 
 # these are redundant for tiny-llams, so ignore
-DATA_DIR="/lustre/orion/csc547/proj-shared/parallel_deep_learning/book_corpus"
-VOCAB_FILE="${DATA_DIR}/gpt2-vocab.json"
-MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
-DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
+MEGATRON_TOKENIZER_DIR="/lustre/orion/proj-shared/csc569/book_corpus_megatron"
+VOCAB_FILE="${MEGATRON_TOKENIZER_DIR}/gpt2-vocab.json"
+MERGE_FILE="${MEGATRON_TOKENIZER_DIR}/gpt2-merges.txt"
+
 
 # we will save and load model checkpoints here
-CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints_2"
+# if these are non-empty training will restart from the latest checkpoint here
+# else training will start from scratch
+CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints"
 
-#TODO: tensorboard logging
-#TENSORBOARD_DIR="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/logs"
-#mkdir -p ${TENSORBOARD_DIR}
 
-# tiny-llama1.1B
+# tiny-llama1.1B architecture shapes
 # https://github.com/azshue/lit-gpt-dev/blob/tiny-llama/lit_gpt/config.py
-#
-GLOBAL_BATCH_SIZE=512
-SEQUENCE_LENGTH=2048
 NUM_LAYERS=22
 NUM_HEADS=32
 HIDDEN_SIZE=2048	
 FFN_HIDDEN_SIZE=5632
 NUM_QUERY_GROUPS=4
-TOKENS_IN_BILLIONS=3000
 
+# batch size, seq length, and iterations
+GLOBAL_BATCH_SIZE=512
+SEQUENCE_LENGTH=2048
+TOKENS_IN_BILLIONS=3000
 TRAIN_ITERS=$(( TOKENS_IN_BILLIONS * 1000000000 / GLOBAL_BATCH_SIZE / SEQUENCE_LENGTH  + 100 )) 
 echo "Number of training iterations : ${TRAIN_ITERS}"
 
-## AxoNN args
+## AxoNN parallelism args
 ## These do not affect the science
 ROW_TENSOR_PARR=1
 COLUMN_TENSOR_PARR=1
@@ -78,8 +87,16 @@ MP=$(( ROW_TENSOR_PARR * COLUMN_TENSOR_PARR * DEPTH_TENSOR_PARR ))
 DP=$(( GPUS / MP ))
 MICRO_BATCH_SIZE=$(( GLOBAL_BATCH_SIZE / DP ))
 
-
-config="r-${ROW_TENSOR_PARR}-c-${COLUMN_TENSOR_PARR}-d-${DEPTH_TENSOR_PARR}-g-${GPUS}"
+# The following args enable LLaMA
+# --swiglu makes ParallelMLP equivalent to LLAMAMLP
+# --group-query-attention - enables group query attention
+# --num-query-groups - number of query groups for group query attention
+# --normalization RMSNorm - switch from layernorm to RMSNorm (someone confirm?)
+# --use-rotary-position-embeddings - use RoPE embeddings instead of learned position embeddings
+#
+# The following args disable features not compatible with AMD
+# --no-gradient-accumulation-fusion 
+# --use-amd 
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -117,10 +134,9 @@ GPT_ARGS="
     --group-query-attention \
     --num-query-groups ${NUM_QUERY_GROUPS}
 "
-# --no-gradient-accumulation-fusion is neede on AMD
-# --use-amd disables features incompatible with AMD
-# --swiglu makes ParallelMLP equivalent to LLAMAMLP
 
+## AxoNN specific args for communication optimizations
+# these do not affect the ML science
 if [[ $OVERLAP == "True" ]]
 then
 	GPT_ARGS="${GPT_ARGS} \
@@ -130,17 +146,34 @@ then
 		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
 fi
 
-# the data-path vocab-file and marge-file args are redundant here
-# the custom-dataloader is switching to the lit gpt dataloader
+# --lit-gpt-data-path - is pointing to your dataset
+# currently both train and val splits are taken fron --data-path
+# the --custom-dataloader argument bypasses megatron's dataloaders
+# --num-workers 0 - disables multiprocesses dataloading 
+# which can hang jobs at scale
+
 DATA_ARGS="
-    --vocab-file $VOCAB_FILE \
-    --merge-file $MERGE_FILE \
-    --split 949,50,1 \
+    --lit-gpt-data-path $DATAPATH \
     --custom-dataloader \
     --num-workers 0
 "
 
+# these args are for megatron dataloaders
+# these are not needed for litgpt, but not passing them
+# might give you errors
+# THESE DO NOTHING
+REDUNDANT_DATA_ARGS="
+    --vocab-file $VOCAB_FILE \
+    --merge-file $MERGE_FILE \
+    --split 949,50,1 \
+"
 
+DATA_ARGS="${DATA_ARGS} ${REDUNDANT_DATA_ARGS}"
+
+# --eval-interval 1000 - do validation after every 1000 arguments
+# --eval-iters 100 - do validation for 100 iterations
+# --save-interval 1000 - save the model after every 1000 iterations
+# --log-interval 1 - print iteration lossees after every 1 iteration
 OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 1000 \
@@ -158,7 +191,6 @@ SCRIPT="python -u pretrain_gpt.py \
 "
 
 
-export PYTHONPATH="$PYTHONPATH:/lustre/orion/scratch/ssingh37/csc547/lit-gpt-dev"
 export OMP_NUM_THREADS=7 
 run_cmd="srun -N ${NNODES} -n ${GPUS} -c7 --gpus-per-task=1 --gpu-bind=closest ./examples/get_rank_from_slurm.sh ${SCRIPT}" 
 

@@ -56,11 +56,13 @@ def create_dataloader(
 def create_dataloaders(
     batch_size: int,
     block_size: int,
-    train_data_dir: Path = Path("/lustre/orion/csc569/proj-shared/language_datasets/spj_star_combined_sample_tinyllama_tokd"),
-    val_data_dir: Optional[Path] = Path("/lustre/orion/csc569/proj-shared/language_datasets/spj_star_combined_sample_tinyllama_tokd"),
-    seed: int = 12345,
+    train_data_dir: str, 
+    val_data_dir: str,
+    seed: int = 12345, #this seed is independent of megatron's seeds
 ) -> Tuple[DataLoader, DataLoader]:
     # Increase by one because we need the next word as well
+    train_data_dir = Path(train_data_dir)
+    val_data_dir = Path(val_data_dir)
     effective_block_size = block_size + 1
     train_dataloader = create_dataloader(
         batch_size=batch_size,
@@ -86,7 +88,7 @@ if __name__ == "__main__":
     ax.init(G_inter=1, G_data=1, G_intra_r=8)
     train_loader, val_loader = create_dataloaders(
         batch_size=32,
-        block_size=1024, #seuqnce length?
+        block_size=1024, #sequence length
     )
     data = next(train_loader)
     print(dist.get_rank(), ":", data.view(-1)[:5])

@@ -1164,6 +1164,9 @@ def _add_data_args(parser):
     group.add_argument('--eod-mask-loss', action='store_true',
                        help='Mask loss for the end of document tokens.')
 
+    ## add separate argument for lit gpt data paths
+    group.add_argument('--lit-gpt-data-path', type=str,
+                       help="data path for custom lit gpt dataloaders")
     return parser
 
 

@@ -149,6 +149,8 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
         train_iterator, valid_iterator = create_dataloaders(
             batch_size= args.micro_batch_size,
             block_size= args.seq_length,
+            train_data_dir = args.lit_gpt_data_path,
+            val_data_dir = args.lit_gpt_data_path,
         )
 
         # these flags are set within megatron in 
