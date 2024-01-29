@@ -1,8 +1,14 @@
 # How to setup on frontier
 
 ## Installing all dependencies
-# Note that this is a python virtual environment based setup
-# You might need to change this a bit for conda 
+Note that this is a python virtual environment based setup
+You might need to change this a bit for conda 
+
+Also this assumes that you are starting from scratch and have no venv/conda
+environment enabled.
+
+We are going to install everything on scratch.
+
 ```
 cd /lustre/orion/scratch/$(whoami)/csc569/
 bash install_everything_on_frontier.sh
