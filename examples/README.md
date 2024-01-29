@@ -12,6 +12,7 @@ This should work, let Siddharth know if it doesn't
 ## Training TinyLLaMA
 To launch on 16 nodes (128 GPUs) for 2 hours
 ```
+## checkout the tiny-llama branch
 sbatch -N 128 -t 02:00:00 examples/run_axonn_amd_tinyllama.sh
 ``` 
 
