@@ -56,8 +56,8 @@ def create_dataloader(
 def create_dataloaders(
     batch_size: int,
     block_size: int,
-    train_data_dir: Path = Path("/lustre/orion/csc569/proj-shared/language_datasets/spj_star_combined_sample"),
-    val_data_dir: Optional[Path] = Path("/lustre/orion/csc569/proj-shared/language_datasets/spj_star_combined_sample"),
+    train_data_dir: Path = Path("/lustre/orion/csc569/proj-shared/language_datasets/spj_star_combined_sample_tinyllama_tokd"),
+    val_data_dir: Optional[Path] = Path("/lustre/orion/csc569/proj-shared/language_datasets/spj_star_combined_sample_tinyllama_tokd"),
     seed: int = 12345,
 ) -> Tuple[DataLoader, DataLoader]:
     # Increase by one because we need the next word as well
