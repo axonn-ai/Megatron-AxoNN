@@ -17,7 +17,7 @@ bash install_everything_on_frontier.sh
 This should work, let Siddharth know if it doesn't
 
 ## Training TinyLLaMA
-First checkout the tiny-llama branch of megatron-axonn
+First checkout the tiny-llama branch of Megatron-AxoNN.
 Then open `examples/run_axonn_amd_tinyllama.sh`, and change the following
 
 ```
@@ -30,9 +30,11 @@ export PYTHONPATH="$PYTHONPATH:/path/to/lit-gpt-dev"
 ```
 
 Now you are ready to train.
-To launch on 16 nodes (128 GPUs) for 2 hours
+To launch on 16 nodes (128 GPUs) for 2 hours:
 ```
 ## checkout the tiny-llama branch
-sbatch -N 128 -t 02:00:00 examples/run_axonn_amd_tinyllama.sh
+sbatch -N 128 -o /path/to/output/file -t 02:00:00 examples/run_axonn_amd_tinyllama.sh
 ``` 
+
+
 
