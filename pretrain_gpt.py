@@ -1,7 +1,6 @@
 # Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
 
 """Pretrain GPT"""
-from mpi4py import MPI
 import os
 import torch
 from functools import partial
@@ -178,7 +177,7 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
         return train_ds, valid_ds, test_ds
 
 
-def set_device_and_init_torch_dist():
+def set_device_and_init_torch_dist_mpi():
     world_rank = MPI.COMM_WORLD.Get_rank()
     world_size = MPI.COMM_WORLD.Get_size()
 
@@ -203,9 +202,12 @@ def set_device_and_init_torch_dist():
     os.environ["WORLD_SIZE"] = str(world_size)
 
 
+
 if __name__ == "__main__":
-    set_device_and_init_torch_dist()
+    #set_device_and_init_torch_dist_mpi()
     #torch.cuda.set_per_process_memory_fraction(0.5) # 40GB
+    # env variables being set in slurm
+    torch.distributed.init_process_group()
     pretrain(train_valid_test_datasets_provider,
              model_provider,
              ModelType.encoder_or_decoder,
