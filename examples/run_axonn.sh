@@ -1,21 +1,24 @@
 #!/bin/bash
 
-# Runs the "345M" parameter model
+echo "This trains a 5B parameter model on 64 GPUs of Perlmutter"
 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 
 NNODES=$SLURM_JOB_NUM_NODES
 GPUS=$(( NNODES * 4 ))
+
+export WORLD_SIZE=$GPUS
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=29500
-export WORLD_SIZE=${GPUS}
-export CUDA_DEVICE_MAX_CONNECTIONS=1
-export NCCL_NET_GDR_LEVEL=PHB
-export CUDA_DEVICE_MAX_CONNECTIONS=1
 export CUDA_VISIBLE_DEVICES=3,2,1,0
+
+export NCCL_NET_GDR_LEVEL=PHB
 export NCCL_CROSS_NIC=1
 export NCCL_SOCKET_IFNAME=hsn
+
+# these are specific to perlmutter's slingshot-11 network
+#
 export NCCL_NET="AWS Libfabric"
 export FI_CXI_RDZV_THRESHOLD=0
 export FI_CXI_RDZV_GET_MIN=0
@@ -23,63 +26,49 @@ export FI_CXI_OFLOW_BUF_SIZE=1073741824
 export FI_CXI_OFLOW_BUF_COUNT=1
 
 
-DATA_DIR="${SCRATCH}/gpt_data"
-CHECKPOINT_PATH="${DATA_DIR}/checkpoints"
-VOCAB_FILE="${DATA_DIR}/gpt2-vocab.json"
-MERGE_FILE="${DATA_DIR}/gpt2-merges.txt"
-DATA_PATH="${DATA_DIR}/BookCorpusDataset_text_document"
+DATA_DIR="$SCRATCH/gpt_data"
+CHECKPOINT_PATH="$DATA_DIR/checkpoints"
+VOCAB_FILE="$DATA_DIR/gpt2-vocab.json"
+MERGE_FILE="$DATA_DIR/gpt2-merges.txt"
+DATA_PATH="$DATA_DIR/BookCorpusDataset_text_document"
 
 ## ARCHITECTURE DETAILS
-NUM_LAYERS=32
-NUM_HEADS=40
-HIDDEN_SIZE=5120
+NUM_LAYERS=24
+NUM_HEADS=32
+HIDDEN_SIZE=4096
 
 ## PARALLELISM DETAILS
 COLUMN_TENSOR_PARR=1
-ROW_TENSOR_PARR=4
-DEPTH_TENSOR_PARR=2
+ROW_TENSOR_PARR=1
+DEPTH_TENSOR_PARR=16
 PIPE_PARR=1
+CACHE_LEVEL=0
 CACHE_LAYERS=0
 OVERLAP=True
-TRAIN_ITERS=10
-EVAL_ITERS=1
 
 NSYS_PROFILE=False
-NCU_PROFILE=False
-if [[ ${NCU_PROFILE} == True ]]
-then
-	COLUMN_TENSOR_PARR=1
-	ROW_TENSOR_PARR=1
-	DEPTH_TENSOR_PARR=1
-	PIPE_PARR=1
-	NNODES=1
-	GPUS=1
-	NUM_LAYERS=1
-	TRAIN_ITERS=1
-	EVAL_ITERS=0
-fi
-
-PROFILE_NAME="test_20B_1x1x16"
+PROFILE_NAME="test_10B_16x1"
 
 ## BATCH SIZES
-MICRO_BATCH_SIZE=4
-GLOBAL_BATCH_SIZE=4
+MICRO_BATCH_SIZE=128
+GLOBAL_BATCH_SIZE=512
 SEQUENCE_LENGTH=2048
+TRAIN_ITERS=20
 
 GPT_ARGS="
-    --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
-    --column-tensor-model-parallel-size ${COLUMN_TENSOR_PARR} \
-    --depth-tensor-model-parallel-size ${DEPTH_TENSOR_PARR} \
-    --pipeline-model-parallel-size ${PIPE_PARR} \
-    --num-layers ${NUM_LAYERS} \
-    --hidden-size ${HIDDEN_SIZE} \
-    --num-attention-heads ${NUM_HEADS} \
-    --seq-length ${SEQUENCE_LENGTH} \
-    --max-position-embeddings ${SEQUENCE_LENGTH} \
-    --micro-batch-size ${MICRO_BATCH_SIZE} \
-    --global-batch-size ${GLOBAL_BATCH_SIZE} \
+    --row-tensor-model-parallel-size $ROW_TENSOR_PARR \
+    --column-tensor-model-parallel-size $COLUMN_TENSOR_PARR \
+    --depth-tensor-model-parallel-size $DEPTH_TENSOR_PARR \
+    --pipeline-model-parallel-size $PIPE_PARR \
+    --num-layers $NUM_LAYERS \
+    --hidden-size $HIDDEN_SIZE \
+    --num-attention-heads $NUM_HEADS \
+    --seq-length $SEQUENCE_LENGTH \
+    --max-position-embeddings $SEQUENCE_LENGTH \
+    --micro-batch-size $MICRO_BATCH_SIZE \
+    --global-batch-size $GLOBAL_BATCH_SIZE \
     --lr 0.00015 \
-    --train-iters ${TRAIN_ITERS} \
+    --train-iters $TRAIN_ITERS \
     --lr-decay-iters 320000 \
     --lr-decay-style cosine \
     --min-lr 1.0e-5 \
@@ -91,15 +80,16 @@ GPT_ARGS="
     --recompute-granularity full \
     --recompute-method uniform \
     --recompute-num-layers 1 \
-    --layer-caching-level 1
+    --layer-caching-level $CACHE_LEVEL
+
 "
 if [[ $OVERLAP == "True" ]]
 then
-	GPT_ARGS="${GPT_ARGS} \
+	GPT_ARGS="$GPT_ARGS \
 		--overlap-axonn-comm \
 		--overlap-axonn-reduce-scatter \
 		--overlap-axonn-all-gather\
-		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather ${CACHE_LAYERS}"
+		--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather $CACHE_LAYERS"
 fi
 
 
@@ -114,7 +104,7 @@ OUTPUT_ARGS="
     --log-interval 1 \
     --save-interval 10000 \
     --eval-interval 1000 \
-    --eval-iters ${EVAL_ITERS}
+    --eval-iters 0
 "
 
 
@@ -126,31 +116,27 @@ SCRIPT="python -u pretrain_gpt.py \
     --distributed-backend nccl \
 "
 
-if [[ ${NSYS_PROFILE} == "True" ]]
+if [[ $NSYS_PROFILE == "True" ]]
 then
 	echo "profiling with nsys"
 	SCRIPT="nsys profile -s none \
-		-t nvtx,cuda -o ${PROFILE_NAME} \
+		-t nvtx,cuda -o $PROFILE_NAME \
 		--force-overwrite=true  \
 		--capture-range=cudaProfilerApi \
 		--capture-range-end=stop \
-		${SCRIPT} \
+		$SCRIPT \
 		--profile-step-start 5 \
 		--profile-step-end 10 \
 		--profile
 		"
-elif [[ ${NCU_PROFILE} == "True" ]]
-then
-	echo "profiling with ncu"
-	SCRIPT="ncu -f --metrics sm__inst_executed_pipe_tensor.sum,sm__pipe_tensor_cycles_active.sum -o ${PROFILE_NAME} ${SCRIPT}"
 fi
 
 # add these args if you want to save and load checkpoints
 #--save $CHECKPOINT_PATH \
 # --load $CHECKPOINT_PATH
 
-run_cmd="srun -C gpu -N ${NNODES} -n ${GPUS} -c 32 --cpu-bind=cores --gpus-per-node=4 ./examples/get_rank_from_slurm.sh ${SCRIPT}" 
+run_cmd="srun -C gpu -N $NNODES -n $GPUS -c 32 --cpu-bind=cores --gpus-per-node=4 ./examples/get_rank_from_slurm.sh $SCRIPT" 
 
-echo ${run_cmd}
-eval ${run_cmd}
+echo $run_cmd
+eval $run_cmd
 set +x
