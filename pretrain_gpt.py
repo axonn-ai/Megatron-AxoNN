@@ -159,7 +159,7 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
     return train_ds, valid_ds, test_ds
 
 
-def set_device_and_init_torch_dist():
+def set_device_and_init_torch_dist_mpi():
     from mpi4py import MPI
     import os
 
@@ -185,6 +185,11 @@ def set_device_and_init_torch_dist():
 
     os.environ["RANK"] = str(world_rank)
     os.environ["WORLD_SIZE"] = str(world_size)
+
+def set_device_and_init_torch_dist():
+    torch.distributed.init_process_group(
+            backend="nccl",
+    )
 
 
 if __name__ == "__main__":

@@ -129,9 +129,10 @@ class ParallelMLP(MegatronModule):
 
     def forward(self, hidden_states):
         torch.cuda.nvtx.range_push(f"MLP Block")
+        args = get_args()
         # [s, b, 4hp]
         intermediate_parallel, bias_parallel = self.dense_h_to_4h(hidden_states, scatter_input=False, gather_output=False, 
-                                                                  cache_weights_in_all_gather = self.cache_weights_in_all_gather)
+                                                                  cache_weights_in_all_gather = self.cache_weights_in_all_gather and args.layer_caching_level>=1)
 
         if self.bias_gelu_fusion:
             assert self.add_bias is True
@@ -144,7 +145,7 @@ class ParallelMLP(MegatronModule):
 
         # [s, b, h]
         output, output_bias = self.dense_4h_to_h(intermediate_parallel, scatter_input=False, gather_output=False, 
-                                                                  cache_weights_in_all_gather = self.cache_weights_in_all_gather)
+                                                                  cache_weights_in_all_gather = self.cache_weights_in_all_gather and args.layer_caching_level==2)
         torch.cuda.nvtx.range_pop()
         return output, output_bias
 
@@ -547,6 +548,7 @@ class ParallelAttention(MegatronModule):
         # =================================================
         # Pre-allocate memory for key-values for inference.
         # =================================================
+        args = get_args()
         torch.cuda.nvtx.range_push(f"Attention Block")
         is_first_step = False
         if inference_params:
@@ -574,7 +576,7 @@ class ParallelAttention(MegatronModule):
 
             # Attention heads [sq, b, h] --> [sq, b, ng * (np/ng + 2) * hn)]
             mixed_x_layer, _ = self.query_key_value(hidden_states, scatter_input=False, gather_output=False, 
-                                                    cache_weights_in_all_gather=self.cache_weights_in_all_gather)
+                                                    cache_weights_in_all_gather=self.cache_weights_in_all_gather and args.layer_caching_level==2)
 
             # [sq, b, hp] --> [sq, b, ng, (np/ng + 2) * hn]
             new_tensor_shape = mixed_x_layer.size()[:-1] + (
@@ -720,7 +722,9 @@ class ParallelAttention(MegatronModule):
         # Output. [sq, b, h]
         # =================
 
-        output, bias = self.dense(context_layer, scatter_input=False, gather_output=False, cache_weights_in_all_gather=self.cache_weights_in_all_gather)
+        output, bias = self.dense(context_layer, scatter_input=False, gather_output=False, 
+                                  cache_weights_in_all_gather=self.cache_weights_in_all_gather 
+                                  and args.layer_caching_level==2)
         torch.cuda.nvtx.range_pop()
         return output, bias
 

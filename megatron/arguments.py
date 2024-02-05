@@ -1004,6 +1004,7 @@ def _add_distributed_args(parser):
                        help='Overlap reduce scatters in backward pass of AxoNN\'s tensor parallelism')
     group.add_argument('--num-layers-for-caching-weights-in-depth-tensor-parallel-all-gather', type=int, default=0,
                        help='number of layers to cache weights during the first all-gather for a batch')
+    group.add_argument('--layer-caching-level', type=int, default=2)
     group.add_argument('--overlap-axonn-all-gather', action='store_true', default=False,
                        help='Overlap all-gathers in forward pass of AxoNN\'s tensor parallelism')
     

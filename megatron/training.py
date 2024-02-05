@@ -99,8 +99,8 @@ def pretrain(train_valid_test_dataset_provider,
     # image ... launches.
     global _TRAIN_START_TIME
     start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
-    torch.distributed.all_reduce(start_time_tensor,
-                                 op=torch.distributed.ReduceOp.MIN)
+    #torch.distributed.all_reduce(start_time_tensor,
+    #                             op=torch.distributed.ReduceOp.MIN)
     _TRAIN_START_TIME = start_time_tensor.item()
     print_rank_0('time to initialize megatron (seconds): {:.3f}'.format(
         time.time() - _TRAIN_START_TIME))
@@ -652,6 +652,7 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             total_loss_dict[nan_iters_key])
         log_string += ' theoretical FLOP/s: {:.3f} TFLOP/s | '.format(get_flops(elapsed_time_per_iteration))
         log_string += ' model size: {:.3f} B params | '.format(get_params())
+        log_string += f' using mpi: {is_mpi_init()}| '
         curr, peak = get_mem()
         log_string += ' memory used by tensors {:.3f} GB ( peak {:.3f} GB)'.format(curr, peak)
 
@@ -667,6 +668,12 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
 
     return report_memory_flag
 
+def is_mpi_init():
+    try:
+        from mpi4py import MPI
+    except ImportError:
+        return False
+    return MPI.Is_initialized()
 
 def get_flops(batch_time):
     args = get_args() 
