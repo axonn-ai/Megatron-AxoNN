@@ -2,6 +2,7 @@
 
 """Pretrain GPT"""
 import os
+import time
 import torch
 from functools import partial
 from megatron import get_args
@@ -118,12 +119,6 @@ def forward_step(data_iterator, model):
     labels = drop(labels, skip_channels=True)
     loss_mask = drop(loss_mask, skip_channels=True)
     position_ids = drop(position_ids, skip_channels=True)
-        #print(tokens.shape)
-        #print(labels.shape)
-        #print(loss_mask.shape)
-        #print(attention_mask.shape)
-        #print(position_ids.shape)
-        #exit()
     
     if args.overlap_axonn_comm:
         ctx = partial(optimize_communication, 
@@ -141,6 +136,8 @@ def forward_step(data_iterator, model):
     return output_tensor, partial(loss_func, loss_mask)
 
 
+
+
 def train_valid_test_datasets_provider(train_val_test_num_samples):
     """Build train, valid, and test datasets."""
     args = get_args()
@@ -152,12 +149,25 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
             train_data_dir = args.lit_gpt_data_path,
             val_data_dir = args.lit_gpt_data_path,
         )
-
         # these flags are set within megatron in 
         # the OG dataloader
         args.do_train = True
         args.do_valid = True
         args.do_test = False
+        if args.consumed_train_samples > 0 and train_iterator is not None:
+            print_rank_0(f"Rewinding dataloader to {args.consumed_train_samples} samples")
+            train_iterator_consumed_samples = 0
+            fake_iters = 0
+            start = time.time()
+            while train_iterator_consumed_samples < args.consumed_train_samples:
+                next(train_iterator)
+                train_iterator_consumed_samples += args.global_batch_size 
+                fake_iters += 1
+                if fake_iters % args.eval_interval == 0:
+                    for _ in range(args.eval_iters):
+                        next(valid_iterator)
+            end = time.time()
+            print_rank_0(f"Time for rewinding the dataloader on rank 0 = {end-start:.2f} s")
 
         return train_iterator, valid_iterator
     else:
