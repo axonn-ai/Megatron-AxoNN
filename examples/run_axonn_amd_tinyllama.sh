@@ -2,6 +2,10 @@
 #SBATCH -p batch
 #SBATCH -A CSC569
 
+## calculating the number of nodes and GPUs
+NNODES=$SLURM_JOB_NUM_NODES
+GPUS_PER_NODE=8 ## change as per your machine
+GPUS=$(( NNODES * GPUS_PER_NODE )) 
 
 userid=$(whoami)
 # These are the two things you need to change as per your setup
@@ -14,6 +18,14 @@ export PYTHONPATH="$PYTHONPATH:/lustre/orion/scratch/$userid/csc547/lit-gpt-dev"
 # The rest of the script should work as it is
 
 echo "This TinyLLAMA script will work for <=512 GPUs."
+
+echo "moving environment to burst buffer"
+## load venv onto burst buffer
+srun -N $NNODES --ntasks-per-node=1 prepare_venv.sh
+## delete old symbolic link
+rm -rf ~/axonn_venv
+## craete new symbolic link
+ln -s /mnt/bb/ssingh37/axonn_venv ~/axonn_venv
 
 module load PrgEnv-cray
 module load cray-python/3.9.13.1
@@ -29,10 +41,6 @@ export HSA_FORCE_FINE_GRAIN_PCIE=1
 export NCCL_CROSS_NIC=1
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
-## calculating the number of nodes and GPUs
-NNODES=$SLURM_JOB_NUM_NODES
-GPUS_PER_NODE=8 ## change as per your machine
-GPUS=$(( NNODES * GPUS_PER_NODE )) 
 
 # setting variables for torch.distributed
 export MASTER_ADDR=$(hostname)
