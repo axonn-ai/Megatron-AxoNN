@@ -1,11 +1,55 @@
 #!/bin/bash
 #SBATCH -p batch
 #SBATCH -A CSC569
+#SBATCH -C nvme
+
+# tiny_llama = [
+#     dict(
+#         name="tiny-llama-1.1b{}",
+#         hf_config=dict(org="TinyLlama", name="TinyLlama-1.1B{}"),
+#         block_size=2048, #### CHECKED (Seq Length)
+#         vocab_size=32000, #### NEED TO ADD VOCAB FILES
+#         padding_multiple=64, ### NOT RELEVANT
+#         n_layer=22, ### CHECKED (NUM_LAYERS)
+#         n_head=32, ### CHECKED (NUM_HEADS)	
+#         n_embd=2048, ### CHECKED (HIDDEN_SIZE)
+#         rotary_percentage=1.0, ### TODO: CHECK IF -- USING ROTARY (I think the default is 1: https://github.com/search?q=repo%3Aaxonn-ai%2FMegatron-AxoNN+rotary_percent&type=code)
+#         parallel_residual=False, ### TODO: CHECK (https://github.com/azshue/lit-gpt-dev/blob/99fb9363646bfacb686f72f58274392e6036ad6c/lit_gpt/model.py#L157 and apply_residual_connection_post_layernorm are the same)
+#         bias=False, ### TODO: CHECK "disable-bias-linear" I think. This is the bias for the linear layers
+#         _norm_class="RMSNorm",  ### CHECKED "--normalization RMSNorm"
+#         norm_eps=1e-5, ### TODO: UNLCLEAR WHERE THIS IS -- I think this is fine (https://github.com/search?q=repo%3Aaxonn-ai%2FMegatron-AxoNN%20norm_eps&type=code)
+#         _mlp_class="LLaMAMLP", ### CHECKED "From Line 112, # --swiglu makes ParallelMLP equivalent to LLAMAMLP"
+#         intermediate_size=5632, ### CHECKED "FFN_HIDDEN_SIZE"
+#         n_query_groups=4, #### CHECKED: NUM_QUERY_GROUPS
+#     )
+# ]
+### WE want global batch size of 4M so 4000000/2048
+#### We are gonna copy Olma's BS of 4M
+# global_batch_size = 2048 #NEEL: UPDATED IN BASH SCRIPT
+# learning_rate = 4e-4 #NEEL: Checked "--lr 4.0e-4"
+#### THIS COULD BE SET ACCORDING TO HOW MANY GPUs we want to use
+# micro_batch_size = 8
+# max_tokens = int(1e12)  #NEEL: UPDATED IN BASH SCRIPT
+# warmup_steps = 2000 # We are gonna use tinyllama warmup steps
+#### BELOW ARE IRRELVANT ####
+# log_step_interval = 1
+# eval_iters = 100
+# save_step_interval = 1000
+# eval_step_interval = 1000
+#### ABOVE ARE IRRELVANT ####
+
+# weight_decay = 1e-1  ### Neel: CHECKED "weight-decay 1e-1"
+# beta1 = 0.9 ### Neel: CHECKED
+# beta2 = 0.95 ### Neel: CHECKED
+# grad_clip = 1.0 ### Neel: CHECKED 
+# decay_lr = True <--- This is irrevalant
+# min_lr = 4e-5 ### Neel: CHECKED 
 
 ## calculating the number of nodes and GPUs
 NNODES=$SLURM_JOB_NUM_NODES
 GPUS_PER_NODE=8 ## change as per your machine
 GPUS=$(( NNODES * GPUS_PER_NODE )) 
+
 
 userid=$(whoami)
 # These are the two things you need to change as per your setup
@@ -16,9 +60,10 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/ccs/home/$userid/aws-ofi-rccl/build/
 export PYTHONPATH="$PYTHONPATH:/lustre/orion/scratch/$userid/csc547/lit-gpt-dev"
 
 # The rest of the script should work as it is
-
 echo "This TinyLLAMA script will work for <=512 GPUs."
 
+
+# This blob is setting up my python venv, ignore for conda builds
 echo "moving environment to burst buffer"
 ## load venv onto burst buffer
 srun -N $NNODES --ntasks-per-node=1 prepare_venv.sh
@@ -26,10 +71,11 @@ srun -N $NNODES --ntasks-per-node=1 prepare_venv.sh
 rm -rf ~/axonn_venv
 ## craete new symbolic link
 ln -s /mnt/bb/ssingh37/axonn_venv ~/axonn_venv
-
 module load PrgEnv-cray
 module load cray-python/3.9.13.1
 . /ccs/home/$userid/axonn_venv/bin/activate
+
+
 module load amd-mixed/5.6.0 #this should match with the rocm version your pytorch uses
 module load libfabric
 
@@ -53,10 +99,9 @@ DATASET="spj_star_combined_full_tinyllama_tokd"
 DATAPATH="$DATADIR/$DATASET"
 
 
-# these are redundant for tiny-llams, so ignore
-MEGATRON_TOKENIZER_DIR="/lustre/orion/proj-shared/csc569/book_corpus_megatron"
-VOCAB_FILE="${MEGATRON_TOKENIZER_DIR}/gpt2-vocab.json"
-MERGE_FILE="${MEGATRON_TOKENIZER_DIR}/gpt2-merges.txt"
+########## TODO: FIX TO TINY LLAMA VOCAB #############
+TOKENIZER_DIR="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/llama-tokenizer"
+TOKENIZER_MODEL="${TOKENIZER_DIR}/tokenizer.model"
 
 
 # we will save and load model checkpoints here
@@ -74,9 +119,9 @@ FFN_HIDDEN_SIZE=5632
 NUM_QUERY_GROUPS=4
 
 # batch size, seq length, and iterations
-GLOBAL_BATCH_SIZE=512
+GLOBAL_BATCH_SIZE=32 ## Neel: 2048x2048 = 4M per batch
 SEQUENCE_LENGTH=2048
-TOKENS_IN_BILLIONS=3000
+TOKENS_IN_BILLIONS=1000 ### Neel: Changed 1T #####
 TRAIN_ITERS=$(( TOKENS_IN_BILLIONS * 1000000000 / GLOBAL_BATCH_SIZE / SEQUENCE_LENGTH  + 100 )) 
 echo "Number of training iterations : ${TRAIN_ITERS}"
 
@@ -105,6 +150,7 @@ MICRO_BATCH_SIZE=$(( GLOBAL_BATCH_SIZE / DP ))
 # The following args disable features not compatible with AMD
 # --no-gradient-accumulation-fusion 
 # --use-amd 
+
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -163,20 +209,10 @@ fi
 DATA_ARGS="
     --lit-gpt-data-path $DATAPATH \
     --custom-dataloader \
-    --num-workers 0
+    --num-workers 0 \
+    --tokenizer-type Llama2Tokenizer \
+    --tokenizer-model ${TOKENIZER_MODEL}
 "
-
-# these args are for megatron dataloaders
-# these are not needed for litgpt, but not passing them
-# might give you errors
-# THESE DO NOTHING
-REDUNDANT_DATA_ARGS="
-    --vocab-file $VOCAB_FILE \
-    --merge-file $MERGE_FILE \
-    --split 949,50,1 \
-"
-
-DATA_ARGS="${DATA_ARGS} ${REDUNDANT_DATA_ARGS}"
 
 # --eval-interval 1000 - do validation after every 1000 arguments
 # --eval-iters 100 - do validation for 100 iterations
