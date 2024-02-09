@@ -50,7 +50,6 @@ NNODES=$SLURM_JOB_NUM_NODES
 GPUS_PER_NODE=8 ## change as per your machine
 GPUS=$(( NNODES * GPUS_PER_NODE )) 
 
-
 userid=$(whoami)
 # These are the two things you need to change as per your setup
 # 1. Make LD_LIBRARY_PATH point to wherever your plugin is installed
@@ -59,9 +58,6 @@ export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/ccs/home/$userid/aws-ofi-rccl/build/
 # 2. Make PYTHONPATH point to your local clone of litgpt
 export PYTHONPATH="$PYTHONPATH:/lustre/orion/scratch/$userid/csc547/lit-gpt-dev"
 
-# The rest of the script should work as it is
-echo "This TinyLLAMA script will work for <=512 GPUs."
-
 
 # This blob is setting up my python venv, ignore for conda builds
 echo "moving environment to burst buffer"
@@ -69,7 +65,7 @@ echo "moving environment to burst buffer"
 srun -N $NNODES --ntasks-per-node=1 prepare_venv.sh
 ## delete old symbolic link
 rm -rf ~/axonn_venv
-## craete new symbolic link
+## create new symbolic link
 ln -s /mnt/bb/ssingh37/axonn_venv ~/axonn_venv
 module load PrgEnv-cray
 module load cray-python/3.9.13.1
@@ -98,17 +94,13 @@ DATADIR="/lustre/orion/csc569/proj-shared/language_datasets/"
 DATASET="spj_star_combined_full_tinyllama_tokd"
 DATAPATH="$DATADIR/$DATASET"
 
-
-########## TODO: FIX TO TINY LLAMA VOCAB #############
 TOKENIZER_DIR="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/llama-tokenizer"
 TOKENIZER_MODEL="${TOKENIZER_DIR}/tokenizer.model"
-
 
 # we will save and load model checkpoints here
 # if these are non-empty training will restart from the latest checkpoint here
 # else training will start from scratch
 CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints"
-
 
 # tiny-llama1.1B architecture shapes
 # https://github.com/azshue/lit-gpt-dev/blob/tiny-llama/lit_gpt/config.py
@@ -119,7 +111,7 @@ FFN_HIDDEN_SIZE=5632
 NUM_QUERY_GROUPS=4
 
 # batch size, seq length, and iterations
-GLOBAL_BATCH_SIZE=32 ## Neel: 2048x2048 = 4M per batch
+GLOBAL_BATCH_SIZE=2048 ## Neel: 2048x2048 = 4M per batch
 SEQUENCE_LENGTH=2048
 TOKENS_IN_BILLIONS=1000 ### Neel: Changed 1T #####
 TRAIN_ITERS=$(( TOKENS_IN_BILLIONS * 1000000000 / GLOBAL_BATCH_SIZE / SEQUENCE_LENGTH  + 100 )) 
@@ -129,11 +121,10 @@ echo "Number of training iterations : ${TRAIN_ITERS}"
 ## These do not affect the science
 ROW_TENSOR_PARR=1
 COLUMN_TENSOR_PARR=1
-DEPTH_TENSOR_PARR=2
+DEPTH_TENSOR_PARR=1
 PIPE_PARR=1
-CACHE_LAYERS=22
+CACHE_LAYERS=0
 OVERLAP=True
-
 
 ## DERIVED ARGUMENTS (ignore)
 MP=$(( ROW_TENSOR_PARR * COLUMN_TENSOR_PARR * DEPTH_TENSOR_PARR ))
@@ -146,11 +137,12 @@ MICRO_BATCH_SIZE=$(( GLOBAL_BATCH_SIZE / DP ))
 # --num-query-groups - number of query groups for group query attention
 # --normalization RMSNorm - switch from layernorm to RMSNorm (someone confirm?)
 # --use-rotary-position-embeddings - use RoPE embeddings instead of learned position embeddings
-#
+# --untie-embeddings-and-output-weights - untie embedding and last layer weights
+# --disable-bias-linear - disables bias in all nn.linear layers
+
 # The following args disable features not compatible with AMD
 # --no-gradient-accumulation-fusion 
 # --use-amd 
-
 
 GPT_ARGS="
     --row-tensor-model-parallel-size ${ROW_TENSOR_PARR} \
@@ -186,7 +178,9 @@ GPT_ARGS="
     --use-rotary-position-embeddings \
     --normalization RMSNorm \
     --group-query-attention \
-    --num-query-groups ${NUM_QUERY_GROUPS}
+    --num-query-groups ${NUM_QUERY_GROUPS} \
+    --untie-embeddings-and-output-weights \
+    --disable-bias-linear
 "
 
 ## AxoNN specific args for communication optimizations
