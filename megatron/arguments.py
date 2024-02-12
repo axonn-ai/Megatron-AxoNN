@@ -422,6 +422,12 @@ def core_transformer_config_from_args(args):
     if args.init_method_xavier_uniform:
         kw_args['init_method'] = torch.nn.init.xavier_uniform_
         kw_args['scaled_init_method'] = torch.nn.init.xavier_uniform_
+    elif args.init_method_tiny_llama:
+        from megatron.core.utils import init_method_normal
+        import math
+        kw_args['init_method'] = init_method_normal(math.sqrt(2.0 / 5 / args.hidden_size))
+        kw_args['output_layer_init_method'] = init_method_normal(1 / math.sqrt(args.hidden_size) / args.num_layers )
+
     if args.group_query_attention:
         kw_args['num_query_groups'] = args.num_query_groups
     else:
@@ -699,6 +705,8 @@ def _add_regularization_args(parser):
                        'numerical stability')
     group.add_argument('--sgd-momentum', type=float, default=0.9,
                        help='Momentum factor for sgd')
+    group.add_argument('--use-apex-adam', action='store_true', default=False,
+                       help="Use Apex's implementation of Adam")
 
     return parser
 
@@ -861,6 +869,8 @@ def _add_initialization_args(parser):
                        'distribution used for weight initialization.')
     group.add_argument('--init-method-xavier-uniform', action='store_true',
                        help='Enable Xavier uniform parameter initialization')
+    group.add_argument('--init-method-tiny-llama', action='store_true',
+                       help='Enable Tiny LLaMA based initialization')
 
     return parser
 
