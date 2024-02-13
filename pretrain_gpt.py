@@ -148,6 +148,7 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
             block_size= args.seq_length,
             train_data_dir = args.lit_gpt_data_path,
             val_data_dir = args.lit_gpt_data_path,
+            seed = args.seed + ax.config.data_parallel_rank
         )
         # these flags are set within megatron in 
         # the OG dataloader
@@ -168,7 +169,7 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
                         next(valid_iterator)
             end = time.time()
             print_rank_0(f"Time for rewinding the dataloader on rank 0 = {end-start:.2f} s")
-
+        
         return train_iterator, valid_iterator
     else:
         print_rank_0('> building train, validation, and test datasets '
