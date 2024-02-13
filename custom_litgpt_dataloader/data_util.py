@@ -48,6 +48,8 @@ def create_dataloader(
     sum_weights = sum(weights)
     weights = [el / sum_weights for el in weights]
 
+    #having different seeds here is important such that each batch has tokens
+    #from all data mixtures.
     combined_dataset = CombinedDataset(datasets=datasets, seed=seed, weights=weights)
 
     return DataLoader(combined_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
