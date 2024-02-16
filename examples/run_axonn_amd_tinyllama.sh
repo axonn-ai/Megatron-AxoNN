@@ -100,7 +100,7 @@ TOKENIZER_MODEL="${TOKENIZER_DIR}/tokenizer.model"
 # we will save and load model checkpoints here
 # if these are non-empty training will restart from the latest checkpoint here
 # else training will start from scratch
-CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints"
+CHECKPOINT_PATH="/lustre/orion/csc569/proj-shared/megatron-axonn-tiny-llama-1.1b/checkpoints/dataloader_correction"
 
 # tiny-llama1.1B architecture shapes
 # https://github.com/azshue/lit-gpt-dev/blob/tiny-llama/lit_gpt/config.py
@@ -126,10 +126,14 @@ PIPE_PARR=1
 CACHE_LAYERS=0
 OVERLAP=True
 
+
+GRAD_ACC=2
+GRADIENT_CHECKPOINT=False
+
 ## DERIVED ARGUMENTS (ignore)
 MP=$(( ROW_TENSOR_PARR * COLUMN_TENSOR_PARR * DEPTH_TENSOR_PARR ))
 DP=$(( GPUS / MP ))
-MICRO_BATCH_SIZE=$(( GLOBAL_BATCH_SIZE / DP ))
+MICRO_BATCH_SIZE=$(( GLOBAL_BATCH_SIZE / DP / GRAD_ACC ))
 
 # The following args enable LLaMA
 # --swiglu makes ParallelMLP equivalent to LLAMAMLP
@@ -170,9 +174,6 @@ GPT_ARGS="
     --bf16 \
     --no-gradient-accumulation-fusion \
     --use-amd \
-    --recompute-granularity full \
-    --recompute-method uniform \
-    --recompute-num-layers 1 \
     --use-flash-attn \
     --swiglu \
     --use-rotary-position-embeddings \
@@ -180,8 +181,16 @@ GPT_ARGS="
     --group-query-attention \
     --num-query-groups ${NUM_QUERY_GROUPS} \
     --untie-embeddings-and-output-weights \
-    --disable-bias-linear
+    --disable-bias-linear \
+    --use-apex-adam
 "
+
+if [[ $GRADIENT_CHECKPOINT == "True" ]]
+then
+    GPT_ARGS="${GPT_ARGS} --recompute-granularity full \
+    			  --recompute-method uniform \
+    			  --recompute-num-layers 1"
+fi
 
 ## AxoNN specific args for communication optimizations
 # these do not affect the ML science
