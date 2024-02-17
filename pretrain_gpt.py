@@ -148,7 +148,7 @@ def train_valid_test_datasets_provider(train_val_test_num_samples):
             block_size= args.seq_length,
             train_data_dir = args.lit_gpt_data_path,
             val_data_dir = args.lit_gpt_data_path,
-            seed = args.seed + ax.config.data_parallel_rank
+            seed = 12345
         )
         # these flags are set within megatron in 
         # the OG dataloader

@@ -182,7 +182,10 @@ GPT_ARGS="
     --num-query-groups ${NUM_QUERY_GROUPS} \
     --untie-embeddings-and-output-weights \
     --disable-bias-linear \
-    --use-apex-adam
+    --use-apex-adam \
+    --seed 78965 \
+    --attention-dropout 0 \
+    --hidden-dropout 0
 "
 
 if [[ $GRADIENT_CHECKPOINT == "True" ]]
