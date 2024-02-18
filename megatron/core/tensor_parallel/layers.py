@@ -582,6 +582,8 @@ class ColumnParallelLinear(torch.nn.Module):
         keep_master_weight_for_test=False,
         skip_bias_add=False,
         skip_weight_param_allocation: bool = False,
+        for_embedding_and_clf_layer: bool = False
+
     ):
         super(ColumnParallelLinear, self).__init__()
 
@@ -590,10 +592,11 @@ class ColumnParallelLinear(torch.nn.Module):
         self.output_size = output_size
         self.gather_output = gather_output
         # Divide the weight matrix along the last dimension.
-        world_size = get_tensor_model_parallel_world_size()
+        world_size = get_tensor_model_parallel_world_size(for_embedding_and_clf_layer=for_embedding_and_clf_layer)
         self.output_size_per_partition = divide(output_size, world_size)
         self.skip_bias_add = skip_bias_add
         self.config = config
+        self.for_embedding_and_clf_layer = for_embedding_and_clf_layer
 
         # Parameters.
         # Note: torch.nn.functional.linear performs XA^T + b and as a result
@@ -601,6 +604,7 @@ class ColumnParallelLinear(torch.nn.Module):
         # Initialize weight.
         if not skip_weight_param_allocation:
             if config.use_cpu_initialization:
+                raise NotImplementedError
                 self.weight = Parameter(
                     torch.empty(
                         self.output_size_per_partition, self.input_size, dtype=config.params_dtype
@@ -628,7 +632,8 @@ class ColumnParallelLinear(torch.nn.Module):
                 )
                 if config.perform_initialization:
                     _initialize_affine_weight_gpu(
-                        self.weight, init_method, partition_dim=0, stride=stride
+                        self.weight, init_method, partition_dim=0, stride=stride, 
+                        for_embedding_and_clf_layer=self.for_embedding_and_clf_layer
                     )
         else:
             self.weight = None
@@ -724,6 +729,7 @@ class ColumnParallelLinear(torch.nn.Module):
             input_parallel = copy_to_tensor_model_parallel_region(input_)
         # Matrix multiply.
         if not weight.requires_grad:
+            raise NotImplementedError
             self._forward_impl = linear_with_frozen_weight
         else:
             self._forward_impl = linear_with_grad_accumulation_and_async_allreduce
@@ -734,6 +740,7 @@ class ColumnParallelLinear(torch.nn.Module):
             gradient_accumulation_fusion=self.gradient_accumulation_fusion,
             async_grad_allreduce=self.async_tensor_model_parallel_allreduce,
             sequence_parallel=self.sequence_parallel,
+            for_embedding_and_clf_layer=self.for_embedding_and_clf_layer
         )
         if self.gather_output:
             # All-gather across the partitions.

@@ -1,8 +1,8 @@
 # Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
 
 """Pretrain GPT"""
-
 import os
+import time
 import torch
 from functools import partial
 from megatron import get_args
@@ -23,6 +23,8 @@ from axonn.intra_layer import optimize_communication
 from axonn.intra_layer.communication import ForwardAllReduce
 from axonn import axonn as ax
 from contextlib import nullcontext
+
+from custom_litgpt_dataloader.data_util import create_dataloaders
 
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
@@ -54,6 +56,9 @@ def get_batch(data_iterator):
         data = next(data_iterator)
     else:
         data = None
+    
+    if args.custom_dataloader:
+        data = {"text": data}
 
     data_b = tensor_parallel.broadcast_data(keys, data, datatype)
     
@@ -67,8 +72,8 @@ def get_batch(data_iterator):
     attention_mask, loss_mask, position_ids = get_ltor_masks_and_position_ids(
         tokens,
         tokenizer.eod,
-        args.reset_position_ids,
-        args.reset_attention_mask,
+        args.reset_position_ids, # for this to work we need access to the tokenizer
+        args.reset_attention_mask, # for this to work we need access to the tokenizer
         args.eod_mask_loss)
 
     return tokens, labels, loss_mask, attention_mask, position_ids
@@ -114,12 +119,6 @@ def forward_step(data_iterator, model):
     labels = drop(labels, skip_channels=True)
     loss_mask = drop(loss_mask, skip_channels=True)
     position_ids = drop(position_ids, skip_channels=True)
-        #print(tokens.shape)
-        #print(labels.shape)
-        #print(loss_mask.shape)
-        #print(attention_mask.shape)
-        #print(position_ids.shape)
-        #exit()
     
     if args.overlap_axonn_comm:
         ctx = partial(optimize_communication, 
@@ -137,32 +136,61 @@ def forward_step(data_iterator, model):
     return output_tensor, partial(loss_func, loss_mask)
 
 
+
+
 def train_valid_test_datasets_provider(train_val_test_num_samples):
     """Build train, valid, and test datasets."""
     args = get_args()
 
-    print_rank_0('> building train, validation, and test datasets '
-                 'for GPT ...')
-    train_ds, valid_ds, test_ds = build_train_valid_test_datasets(
-        data_prefix=args.data_path,
-        splits_string=args.split,
-        train_valid_test_num_samples=train_val_test_num_samples,
-        seq_length=args.seq_length,
-        seed=args.seed,
-        skip_warmup=(not args.mmap_warmup),
-        train_data_prefix=args.train_data_path,
-        valid_data_prefix=args.valid_data_path,
-        test_data_prefix=args.test_data_path,
-        data_cache_path=args.data_cache_path)
-    print_rank_0("> finished creating GPT datasets ...")
+    if args.custom_dataloader:
+        train_iterator, valid_iterator = create_dataloaders(
+            batch_size= args.micro_batch_size,
+            block_size= args.seq_length,
+            train_data_dir = args.lit_gpt_data_path,
+            val_data_dir = args.lit_gpt_data_path,
+            seed = 12345
+        )
+        # these flags are set within megatron in 
+        # the OG dataloader
+        args.do_train = True
+        args.do_valid = True
+        args.do_test = False
+        if args.consumed_train_samples > 0 and train_iterator is not None:
+            print_rank_0(f"Rewinding dataloader to {args.consumed_train_samples} samples")
+            train_iterator_consumed_samples = 0
+            fake_iters = 0
+            start = time.time()
+            while train_iterator_consumed_samples < args.consumed_train_samples:
+                next(train_iterator)
+                train_iterator_consumed_samples += args.global_batch_size 
+                fake_iters += 1
+                if fake_iters % args.eval_interval == 0:
+                    for _ in range(args.eval_iters):
+                        next(valid_iterator)
+            end = time.time()
+            print_rank_0(f"Time for rewinding the dataloader on rank 0 = {end-start:.2f} s")
+        
+        return train_iterator, valid_iterator
+    else:
+        print_rank_0('> building train, validation, and test datasets '
+                     'for GPT ...')
+        train_ds, valid_ds, test_ds = build_train_valid_test_datasets(
+            data_prefix=args.data_path,
+            splits_string=args.split,
+            train_valid_test_num_samples=train_val_test_num_samples,
+            seq_length=args.seq_length,
+            seed=args.seed,
+            skip_warmup=(not args.mmap_warmup),
+            train_data_prefix=args.train_data_path,
+            valid_data_prefix=args.valid_data_path,
+            test_data_prefix=args.test_data_path,
+            data_cache_path=args.data_cache_path)
+        print_rank_0("> finished creating GPT datasets ...")
 
-    return train_ds, valid_ds, test_ds
+        return train_ds, valid_ds, test_ds
 
 
-def set_device_and_init_torch_dist():
-    from mpi4py import MPI
-    import os
-
+def set_device_and_init_torch_dist_mpi():
     world_rank = MPI.COMM_WORLD.Get_rank()
     world_size = MPI.COMM_WORLD.Get_size()
 
@@ -187,9 +215,12 @@ def set_device_and_init_torch_dist():
     os.environ["WORLD_SIZE"] = str(world_size)
 
 
+
 if __name__ == "__main__":
-    set_device_and_init_torch_dist()
+    #set_device_and_init_torch_dist_mpi()
     #torch.cuda.set_per_process_memory_fraction(0.5) # 40GB
+    # env variables being set in slurm
+    torch.distributed.init_process_group()
     pretrain(train_valid_test_datasets_provider,
              model_provider,
              ModelType.encoder_or_decoder,

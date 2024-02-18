@@ -95,6 +95,7 @@ class ParallelMLP(MegatronModule):
                     out_features=ffn_hidden_size,
                     skip_bias_add=True,
                     init_method=config.init_method,
+                    bias = self.add_bias
                 )
 
         self.bias_gelu_fusion = False
@@ -125,13 +126,19 @@ class ParallelMLP(MegatronModule):
             skip_bias_add=True,
             init_method=config.output_layer_init_method,
             transpose=True,
+            bias = self.add_bias
         )
 
     def forward(self, hidden_states):
         torch.cuda.nvtx.range_push(f"MLP Block")
         # [s, b, 4hp]
-        intermediate_parallel, bias_parallel = self.dense_h_to_4h(hidden_states, scatter_input=False, gather_output=False, 
-                                                                  cache_weights_in_all_gather = self.cache_weights_in_all_gather)
+        output = self.dense_h_to_4h(hidden_states, scatter_input=False, gather_output=False, 
+                                    cache_weights_in_all_gather = self.cache_weights_in_all_gather)
+
+        if isinstance(output, tuple):
+            intermediate_parallel, bias_parallel = output
+        else:
+            intermediate_parallel, bias_parallel = output, None
 
         if self.bias_gelu_fusion:
             assert self.add_bias is True
@@ -143,8 +150,14 @@ class ParallelMLP(MegatronModule):
             intermediate_parallel = self.activation_func(intermediate_parallel)
 
         # [s, b, h]
-        output, output_bias = self.dense_4h_to_h(intermediate_parallel, scatter_input=False, gather_output=False, 
+        output = self.dense_4h_to_h(intermediate_parallel, scatter_input=False, gather_output=False, 
                                                                   cache_weights_in_all_gather = self.cache_weights_in_all_gather)
+        
+        if isinstance(output, tuple):
+            output, output_bias = output
+        else:
+            output, output_bias = output, None
+
         torch.cuda.nvtx.range_pop()
         return output, output_bias
 
@@ -463,8 +476,8 @@ class ParallelAttention(MegatronModule):
             self.query_key_value = Linear(
                     in_features=config.hidden_size,
                     out_features=query_projection_size + 2 * kv_projection_size,
-                    skip_bias_add=True,
-                    init_method=config.init_method)
+                    init_method=config.init_method,
+                    bias=args.add_bias_linear)
         else:
             raise NotImplementedError
             assert attention_type == AttnType.cross_attn
@@ -504,7 +517,9 @@ class ParallelAttention(MegatronModule):
                 out_features=config.hidden_size,
                 skip_bias_add=True,
                 init_method=config.output_layer_init_method,
-                transpose=True)
+                transpose=True,
+                bias=args.add_bias_linear
+                )
 
 
     def _checkpointed_attention_forward(self, query_layer, key_layer,
@@ -573,7 +588,7 @@ class ParallelAttention(MegatronModule):
         if self.attention_type == AttnType.self_attn:
 
             # Attention heads [sq, b, h] --> [sq, b, ng * (np/ng + 2) * hn)]
-            mixed_x_layer, _ = self.query_key_value(hidden_states, scatter_input=False, gather_output=False, 
+            mixed_x_layer = self.query_key_value(hidden_states, scatter_input=False, gather_output=False, 
                                                     cache_weights_in_all_gather=self.cache_weights_in_all_gather)
 
             # [sq, b, hp] --> [sq, b, ng, (np/ng + 2) * hn]
@@ -602,7 +617,7 @@ class ParallelAttention(MegatronModule):
                 dim=3)
 
             # [sq, b, ng, np/ng * hn] -> [sq, b, np, hn] -
-            query_layer = query_layer.view(query_layer.size(0), query_layer.size(1), -1, self.hidden_size_per_attention_head)
+            query_layer = query_layer.reshape(query_layer.size(0), query_layer.size(1), -1, self.hidden_size_per_attention_head)
         else:
             # Attention heads [sk, b, h] --> [sk, b, (np * 2 * hn)]
             mixed_kv_layer, _ = self.key_value(encoder_output)
@@ -720,7 +735,12 @@ class ParallelAttention(MegatronModule):
         # Output. [sq, b, h]
         # =================
 
-        output, bias = self.dense(context_layer, scatter_input=False, gather_output=False, cache_weights_in_all_gather=self.cache_weights_in_all_gather)
+        output = self.dense(context_layer, scatter_input=False, gather_output=False, cache_weights_in_all_gather=self.cache_weights_in_all_gather)
+        if isinstance(output, tuple):
+            output, bias = output
+        else:
+            output, bias = output, None
+
         torch.cuda.nvtx.range_pop()
         return output, bias
 
@@ -1675,7 +1695,6 @@ class ParallelTransformer(MegatronModule):
                                                                rotary_pos_emb,
                                                                is_first_microbatch)
                 else:
-                    raise NotImplementedError
                     forward_kwargs = {
                         'encoder_output': encoder_output,
                         'enc_dec_attn_mask': enc_dec_attn_mask,
