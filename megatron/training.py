@@ -747,8 +747,12 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
         if args.profile and \
            iteration == args.profile_step_start and \
            torch.distributed.get_rank() in args.profile_ranks:
-            torch.cuda.cudart().cudaProfilerStart()
-            torch.autograd.profiler.emit_nvtx(record_shapes=True).__enter__()
+            #torch.cuda.cudart().cudaProfilerStart()
+            #torch.autograd.profiler.emit_nvtx(record_shapes=True).__enter__()
+            p=torch.profiler.profile(activities=[
+                torch.profiler.ProfilerActivity.CUDA,
+            ])
+            p.__enter__()
         
         update_num_microbatches(args.consumed_train_samples)
         args.curr_iteration = iteration
@@ -836,7 +840,12 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
         if args.profile and \
            iteration == args.profile_step_end and \
            torch.distributed.get_rank() in args.profile_ranks:
-            torch.cuda.cudart().cudaProfilerStop()
+            #torch.cuda.cudart().cudaProfilerStop()
+            p.__exit__(None, None, None)
+            rank = torch.distributed.get_rank()
+            import os
+            trace_file = os.path.join(args.path_for_traces, f"./trace_{rank}.json")
+            p.export_chrome_trace(trace_file)
 
     return iteration
 
