@@ -777,7 +777,7 @@ def _add_training_args(parser):
                        help='Gloable step to stop profiling.')
     group.add_argument('--profile-ranks', nargs='+', type=int, default=[0],
                        help='Global ranks to profile.')
-
+    group.add_argument('--path-for-traces', type=str, help="Path for dumping traces")
 
     # deprecated
     group.add_argument('--checkpoint-activations', action='store_true',
