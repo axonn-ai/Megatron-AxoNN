@@ -4,6 +4,8 @@
 
 import os
 import torch
+import patch_torch_dist_init 
+
 from functools import partial
 from megatron import get_args
 from megatron import print_rank_0
@@ -23,6 +25,7 @@ from axonn.intra_layer import optimize_communication
 from axonn.intra_layer.communication import ForwardAllReduce
 from axonn import axonn as ax
 from contextlib import nullcontext
+import time
 
 def model_provider(pre_process=True, post_process=True):
     """Build the model."""
@@ -187,10 +190,43 @@ def set_device_and_init_torch_dist_mpi():
     os.environ["WORLD_SIZE"] = str(world_size)
 
 def set_device_and_init_torch_dist():
-    torch.distributed.init_process_group(
-            backend="nccl",
-    )
-
+    start = time.time()
+    filename = os.getenv("TORCH_INIT_FILE", None)
+    if filename is None:
+        rank = int(os.getenv("RANK", 0))
+        world_size = int(os.getenv("WORLD_SIZE", 1))
+        master_ip = os.getenv("MASTER_ADDR", "localhost")
+        master_port = int(os.getenv("MASTER_PORT", "6000"))
+        import datetime as dt
+        if rank == 0:
+            print("Using TCP Store")
+        store = torch.distributed.TCPStore(
+                    host_name = master_ip,
+                    port = master_port,
+                    world_size = world_size,
+                    is_master = (rank == 0),
+                    timeout = dt.timedelta(seconds=60*20)
+                )
+        
+        torch.distributed.init_process_group(
+                backend="nccl",
+                rank = rank,
+                world_size = world_size,
+                store = store
+        )
+    else:
+        print("Using shared file based init")
+        rank = int(os.getenv("RANK", 0))
+        world_size = int(os.getenv("WORLD_SIZE", 1))
+        torch.distributed.init_process_group(
+                init_method=f"file://{filename}",
+                backend="nccl",
+                world_size=world_size,
+                rank=rank
+        )
+    if torch.distributed.get_rank() == 0:
+        print(f"initialized global process group, time taken = {time.time()-start}")
+        
 
 if __name__ == "__main__":
     set_device_and_init_torch_dist()
