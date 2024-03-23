@@ -168,7 +168,6 @@ def _compile_dependencies():
 def _initialize_distributed():
     """Initialize torch.distributed and core model parallel."""
     args = get_args()
-
     device_count = torch.cuda.device_count()
     if torch.distributed.is_initialized():
 
@@ -205,6 +204,10 @@ def _initialize_distributed():
 
     # Set the tensor model-parallel, pipeline model-parallel, and
     # data-parallel communicators.
+    if torch.distributed.get_rank() == 0:
+        print(f"going to start with initializing model parallel group")
+
+    start = time.time()
     if device_count > 0: ## why do we need device count > 0??
         if mpu.model_parallel_is_initialized():
             print("model parallel is already initialized")
@@ -217,6 +220,9 @@ def _initialize_distributed():
                 args.fp8 is not None,
             )
 
+            if torch.distributed.get_rank() == 0:
+                print(f"mpu init model parallel - {time.time()-start} seconds")
+            start = time.time()
             ## adding code to initialize axonn 
             data_parallel_size: int = torch.distributed.get_world_size() // (
                 args.tensor_model_parallel_size * args.pipeline_model_parallel_size
@@ -232,7 +238,8 @@ def _initialize_distributed():
                 G_intra_d = args.depth_tensor_model_parallel_size,
             )
 
-
+            if torch.distributed.get_rank() == 0:
+                print(f"axonn init - {time.time()-start} seconds")
             
             def test_bw(pg):
                 SZ = int(16 * 2048 * 4096 * 10)
@@ -265,15 +272,18 @@ def _initialize_distributed():
             if args.rank == 0:
                 print(
                     f"> initialized tensor model parallel with size "
-                    f"{mpu.get_tensor_model_parallel_world_size()}"
+                    f"{mpu.get_tensor_model_parallel_world_size()}",
+                    flush=True
                 )
                 print(
                     f"> initialized pipeline model parallel with size "
-                    f"{mpu.get_pipeline_model_parallel_world_size()}"
+                    f"{mpu.get_pipeline_model_parallel_world_size()}",
+                    flush=True
                 )
                 print(
                     f"> initialized AxoNN with G_intra_r={args.row_tensor_model_parallel_size}," 
-                    f"G_intra_c={args.column_tensor_model_parallel_size}"
+                    f"G_intra_c={args.column_tensor_model_parallel_size}",
+                    flush=True
                 )
 
 
