@@ -325,7 +325,7 @@ def get_tensor_model_parallel_group(check_initialized=True, for_embedding_and_cl
             ), 'tensor model parallel group is not initialized'
         return _TENSOR_MODEL_PARALLEL_GROUP
     else:
-        return ax.comm_handle.outer_inner_intra_layer_parallel_group
+        return ax.comm_handle.middle_inner_intra_layer_parallel_group
         
 
 def get_pipeline_model_parallel_group():
