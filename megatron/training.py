@@ -43,6 +43,7 @@ from megatron.model.vision.knn_monitor import compute_feature_bank
 
 import axonn
 from axonn import axonn as ax
+import axonn.intra_layer as ax_intra_layer
 
 def print_datetime(string):
     """Note that this call will sync across all ranks."""
@@ -753,6 +754,10 @@ def train(forward_step_func, model, optimizer, opt_param_scheduler,
                 torch.profiler.ProfilerActivity.CUDA,
             ])
             p.__enter__()
+          
+        if iteration > 5:
+            # Start timing.
+            ax_intra_layer.enable_timers()
         
         update_num_microbatches(args.consumed_train_samples)
         args.curr_iteration = iteration

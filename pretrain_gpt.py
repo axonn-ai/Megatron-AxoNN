@@ -24,6 +24,7 @@ from axonn.intra_layer import drop
 from axonn.intra_layer import optimize_communication
 from axonn.intra_layer.communication import ForwardAllReduce
 from axonn import axonn as ax
+import axonn.intra_layer as ax_intra_layer
 from contextlib import nullcontext
 import time
 
@@ -236,3 +237,6 @@ if __name__ == "__main__":
              ModelType.encoder_or_decoder,
              forward_step,
              args_defaults={'tokenizer_type': 'GPT2BPETokenizer'})
+    times, events = ax_intra_layer.timers.get_times()
+    print(f"Events: {events}")
+    print(f"Times: {times}")
