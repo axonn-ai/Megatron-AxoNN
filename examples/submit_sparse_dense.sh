@@ -17,8 +17,8 @@ set -euo pipefail
 # ===========================================================================
 MODEL=10B         # 5B 10B 20B 40B 60B 80B 160B 320B 640B
 MODE=fsdp         # fsdp | fsdp_tp
-SPARSITY=0.99      # 0.0 = baseline, 0.99 = 99% pruning
-SAMPLE_PCT=1.0   # % of grad elements sampled for threshold (100=exact, lower=faster/approx)
+SPARSITY=0.0      # 0.0 = baseline, 0.99 = 99% pruning
+SAMPLE_PCT=100.0   # % of grad elements sampled for threshold (100=exact, lower=faster/approx)
 GBS=512           # global batch size (must be divisible by DTP, see below)
 SEQ_LEN=2048
 TRAIN_ITERS=20
@@ -31,11 +31,11 @@ mkdir -p logs
 
 # --- Modules ---
 module load pytorch/2.8.0
-module load nccl
-module load cudatoolkit/12.4
-module load PrgEnv-gnu
-module load cray-mpich
-module load craype-accel-nvidia80
+module load nccl/2.24.3
+module load cudatoolkit/12.9
+# module load PrgEnv-gnu
+# module load cray-mpich
+# module load craype-accel-nvidia80
 
 # Activate venv if present
 if [ -d "$SCRIPT_DIR/../.venv" ]; then
@@ -48,7 +48,7 @@ export NCCL_DEBUG=INFO
 export NCCL_DEBUG_SUBSYS=INIT,NET
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export CUDA_VISIBLE_DEVICES=3,2,1,0
-unset SLURM_MPI_TYPE
+# unset SLURM_MPI_TYPE
 export NCCL_NET="AWS Libfabric"
 export NCCL_NET_GDR_LEVEL=PHB
 export NCCL_CROSS_NIC=1
@@ -66,13 +66,7 @@ export MPICH_GPU_ALLREDUCE_USE_KERNEL=1
 export MPICH_OFI_NIC_POLICY="USER"
 export MPICH_OFI_NIC_MAPPING="0:3; 1:2; 2:1; 3:0"
 export OMP_NUM_THREADS=8
-# --- CCD sparse collective flags (adaptive_spop, FORMAT_MASK=5) ---
-export NCCL_BUFFSIZE=16777216
-export NCCL_CCD_FORMAT_MASK=5
-export NCCL_CCD_DENSE_THRESHOLD=0.6
-export NCCL_CCD_DENSE_INTRA_THRESHOLD=0.7
-export NCCL_MIN_NCHANNELS=64
-export NCCL_MAX_NCHANNELS=64
+export TORCH_NCCL_USE_COMM_NONBLOCKING=0
 
 # --- Distributed ---
 NNODES=$SLURM_JOB_NUM_NODES

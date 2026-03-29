@@ -80,7 +80,9 @@ class GradientPruner:
 
         for chunk in model_chunks:
             for param in chunk.parameters():
-                g = getattr(param, "main_grad", None) or param.grad
+                g = getattr(param, "main_grad", None)
+                if g is None:
+                    g = param.grad
                 if g is None:
                     continue
                 key = param.data_ptr()
@@ -524,7 +526,7 @@ def train_step(forward_step_func, data_iterator,
 
     # Gradient pruning (after all-reduce, before optimizer clips and steps).
     if args.grad_sparsity > 0.0:
-        args._grad_pruner.step(model)
+        args._grad_pruner_stats = args._grad_pruner.step(model)
 
     # Vision gradients.
     if args.vision_pretraining and args.vision_pretraining_type == "dino":
@@ -674,6 +676,9 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             writer.add_scalar('grad-norm', grad_norm, iteration)
             writer.add_scalar('grad-norm vs samples', grad_norm,
                               args.consumed_train_samples)
+        if args.grad_sparsity > 0.0 and hasattr(args, '_grad_pruner_stats'):
+            writer.add_scalar('grad-sparsity-actual',
+                              args._grad_pruner_stats['sparsity_actual'], iteration)
         if num_zeros_in_grad is not None:
             writer.add_scalar('num-zeros', num_zeros_in_grad, iteration)
             writer.add_scalar('num-zeros vs samples', num_zeros_in_grad,
@@ -730,6 +735,10 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             log_string += ' num zeros: {:.1f} |'.format(num_zeros_in_grad)
         if params_norm is not None:
             log_string += ' params norm: {:.3f} |'.format(params_norm)
+        if args.grad_sparsity > 0.0 and hasattr(args, '_grad_pruner_stats'):
+            s = args._grad_pruner_stats
+            log_string += ' grad sparsity: {:.4f} (nnz {:d}/{:d}) |'.format(
+                s['sparsity_actual'], s['nnz'], s['total'])
         log_string += ' number of skipped iterations: {:3d} |'.format(
             total_loss_dict[skipped_iters_key])
         log_string += ' number of nan iterations: {:3d} |'.format(

@@ -4,7 +4,7 @@
 
 import os
 import torch
-import patch_torch_dist_init 
+# import patch_torch_dist_init 
 
 from functools import partial
 from megatron import get_args
@@ -20,7 +20,7 @@ from megatron.utils import get_ltor_masks_and_position_ids
 from megatron.utils import average_losses_across_data_parallel_group
 from megatron.arguments import core_transformer_config_from_args
 
-from axonn.intra_layer import Drop
+from axonn.intra_layer import drop
 from axonn.intra_layer import optimize_communication
 from axonn.intra_layer.communication import ForwardAllReduce
 from axonn import axonn as ax
