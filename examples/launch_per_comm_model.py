@@ -12,7 +12,7 @@ parser.add_argument('--time', type=int, help="launch wall clock time (in mins)",
 parser.add_argument('--seq-len', type=int, default=2048)
 parser.add_argument('--cache-all', action='store_true', default=False)
 parser.add_argument('--grad-acc', type=int, help="gradient acc degree", default=1)
-parser.add_argument('--model', type=str, choices=["5B", "10B", "20B", "40B", "50B", "60B", "80B", "100B", "175B", "160B"])
+parser.add_argument('--model', type=str, choices=["5B", "10B", "20B", "40B", "60B", "80B", "160B", "320B", "640B"])
 parser.add_argument('--manual', action='store_true', default=False, help="run with manual configuration")
 parser.add_argument('--config', type=int, nargs='+', help="if --manual, pass Gr,Gc,Gd as tuple here")
 
@@ -25,71 +25,23 @@ model=args.model
 
 ## arch
 
-# 175B
-if model == "175B":
-    nlayers=96
-    nhidden=12288
-    nheads=96
-    min_tp=128
-
-elif model == "80B":
-    nlayers=42
-    nhidden=12288
-    nheads=96
-    min_tp=64
-
-elif model == "100B":
-    nlayers=53
-    nhidden=12288
-    nheads=96
-    min_tp=64
-
-elif model == "160B":
-    nlayers=84
-    nhidden=12288
-    nheads=96
-    min_tp=128
-
-# 40B
-elif model == "60B":
-    nlayers=56
-    nhidden=9216
-    nheads=72
-    min_tp=64
-# 40B
-elif model == "40B":
-    nlayers=38
-    nhidden=9216
-    nheads=72
-    min_tp=32
-
-# 40B
-elif model == "50B":
-    nlayers=48
-    nhidden=9216
-    nheads=72
-    min_tp=32
-# 20B
-elif model == "20B":
-    nlayers=32
-    nhidden=7168
-    nheads=56
-    min_tp=16
-#10B
-elif model == "10B":
-    nlayers=32
-    nhidden=5120
-    nheads=40
-    min_tp=8
-#5B
-elif model == "5B":
-    nlayers=24
-    nhidden=4096
-    nheads=32
-    min_tp=4
-
-else:
+model_configs = {
+    "5B":   dict(nlayers=24,  nhidden=4096,  nheads=32,  min_tp=4),
+    "10B":  dict(nlayers=32,  nhidden=5120,  nheads=40,  min_tp=8),
+    "20B":  dict(nlayers=32,  nhidden=7168,  nheads=56,  min_tp=16),
+    "40B":  dict(nlayers=38,  nhidden=9216,  nheads=72,  min_tp=32),
+    "60B":  dict(nlayers=56,  nhidden=9216,  nheads=72,  min_tp=64),
+    "80B":  dict(nlayers=42,  nhidden=12288, nheads=96,  min_tp=64),
+    "160B": dict(nlayers=84,  nhidden=12288, nheads=96,  min_tp=128),
+    "320B": dict(nlayers=96,  nhidden=16384, nheads=128, min_tp=256),
+    "640B": dict(nlayers=192, nhidden=16384, nheads=128, min_tp=512),
+}
+if model not in model_configs:
     raise NotImplementedError
+nlayers = model_configs[model]["nlayers"]
+nhidden = model_configs[model]["nhidden"]
+nheads  = model_configs[model]["nheads"]
+min_tp  = model_configs[model]["min_tp"]
 
 ## gbs and sq
 gbs=args.batch_size

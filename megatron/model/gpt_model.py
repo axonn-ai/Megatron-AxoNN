@@ -12,7 +12,7 @@ from .enums import AttnMaskType
 from .language_model import parallel_lm_logits
 from .language_model import get_language_model
 
-from axonn.intra_layer import drop
+from axonn.intra_layer import Drop
 
 def post_language_model_processing(lm_output, labels, logit_weights,
                                    parallel_output,

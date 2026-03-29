@@ -699,6 +699,14 @@ def _add_regularization_args(parser):
                        'numerical stability')
     group.add_argument('--sgd-momentum', type=float, default=0.9,
                        help='Momentum factor for sgd')
+    group.add_argument('--grad-sparsity', type=float, default=0.0,
+                       help='Fraction of gradient elements to zero out each step '
+                       '(top-k magnitude pruning with error feedback). '
+                       '0.0 = disabled, 0.9 = keep top 10%%.')
+    group.add_argument('--grad-sample-pct', type=float, default=100.0,
+                       help='Percentage of gradient elements sampled to estimate '
+                       'the pruning threshold. 100.0 = exact top-k, '
+                       'lower values are faster but approximate.')
 
     return parser
 
