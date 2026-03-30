@@ -33,9 +33,9 @@ mkdir -p logs
 module load pytorch/2.8.0
 module load nccl/2.24.3
 module load cudatoolkit/12.9
-# module load PrgEnv-gnu
-# module load cray-mpich
-# module load craype-accel-nvidia80
+module load PrgEnv-gnu
+module load cray-mpich
+module load craype-accel-nvidia80
 
 # Activate venv if present
 if [ -d "$SCRIPT_DIR/../.venv" ]; then
@@ -43,7 +43,9 @@ if [ -d "$SCRIPT_DIR/../.venv" ]; then
 fi
 
 # --- NCCL / Libfabric (Perlmutter Slingshot-11) ---
-export LD_PRELOAD=/pscratch/sd/e/egencer/sparsecomms/torchcomms-sparse/build/ncclx/lib/libnccl.so.2
+# NCCLx is loaded via dlmopen shim — do NOT LD_PRELOAD it here.
+export NCCLX_DEBUG=1
+export NCCLX_LIB_PATH=/pscratch/sd/e/egencer/sparsecomms/torchcomms-sparse/build/ncclx/lib/libnccl.so.2
 export NCCL_DEBUG=INFO
 export NCCL_DEBUG_SUBSYS=INIT,NET
 export CUDA_DEVICE_MAX_CONNECTIONS=1
@@ -67,6 +69,13 @@ export MPICH_OFI_NIC_POLICY="USER"
 export MPICH_OFI_NIC_MAPPING="0:3; 1:2; 2:1; 3:0"
 export OMP_NUM_THREADS=8
 export TORCH_NCCL_USE_COMM_NONBLOCKING=0
+
+export NCCL_FASTINIT_MODE=none
+export TORCH_NCCL_BCAST_UNIQUEID=1
+
+# --- Debugging ---
+# ulimit -c unlimited          # enable core dumps
+# export PYTHONFAULTHANDLER=1  # Python-level C stack on SIGSEGV
 
 # --- Distributed ---
 NNODES=$SLURM_JOB_NUM_NODES
