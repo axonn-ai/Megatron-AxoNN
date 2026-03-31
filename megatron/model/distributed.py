@@ -1,11 +1,29 @@
 # Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
 
 import math
+import os
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from typing import Dict, List
 
 import torch
+from axonn.sparse_comms import all_reduce_sparse
+from axonn.gradient_pruner import GradientPruner
+
+# Lazy AR pruner — read env vars once on first bucket communication
+_ar_pruner = "uninitialized"
+
+def _get_ar_pruner():
+    global _ar_pruner
+    if _ar_pruner != "uninitialized":
+        return _ar_pruner
+    if os.environ.get("AXONN_PRUNE_AR", "0") == "1":
+        sparsity = float(os.environ.get("AXONN_PRUNE_SPARSITY", "0"))
+        sample_pct = float(os.environ.get("AXONN_PRUNE_SAMPLE_PCT", "100.0"))
+        _ar_pruner = GradientPruner(sparsity, sample_pct)
+    else:
+        _ar_pruner = None
+    return _ar_pruner
 
 from megatron.core import mpu
 
@@ -97,7 +115,10 @@ class Bucket:
                 async_op=self.overlap_grad_reduce,
             )
         else:
-            self.communication_handle = torch.distributed.all_reduce(
+            pruner = _get_ar_pruner()
+            if pruner is not None:
+                pruner.prune(self.data, key=self.data.data_ptr())
+            self.communication_handle = all_reduce_sparse(
                 self.data, group=self.data_parallel_group, async_op=self.overlap_grad_reduce
             )
         self.communication_issued = True

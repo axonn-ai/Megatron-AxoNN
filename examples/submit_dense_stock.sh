@@ -6,49 +6,53 @@
 #SBATCH --qos=premium
 #SBATCH --time=01:00:00
 #SBATCH --account=m5083_g
-#SBATCH --job-name=sparse_sanity
-#SBATCH --output=logs/sparse_%j.out
-#SBATCH --error=logs/sparse_%j.err
+#SBATCH --job-name=dense_stock
+#SBATCH --output=logs/dense_stock_%j.out
+#SBATCH --error=logs/dense_stock_%j.err
 
 set -euo pipefail
 
 # ===========================================================================
 # Experiment config — edit these before submitting
 # ===========================================================================
-MODEL=10B         # 5B 10B 20B 40B 60B 80B 160B 320B 640B
+MODEL=5B          # 5B 10B 20B 40B 60B 80B 160B 320B 640B
 MODE=fsdp         # fsdp | fsdp_tp
-SPARSITY=0.99      # 0.0 = baseline, 0.99 = 99% pruning
-SAMPLE_PCT=1.0   # % of grad elements sampled for threshold (100=exact, lower=faster/approx)
-GBS=512           # global batch size (must be divisible by DTP, see below)
-SEQ_LEN=2048
+SPARSITY=0.0      # dense baseline
+SAMPLE_PCT=100.0
+GBS=2048          # global batch size (must be divisible by DTP, see below)
+SEQ_LEN=512
 TRAIN_ITERS=20
 SEED=42
 # ===========================================================================
 
 SCRIPT_DIR="/global/u1/e/egencer/scratch/sparsecomms/Megatron-AxoNN"
-cd "$SCRIPT_DIR"   # Megatron-AxoNN root
+cd "$SCRIPT_DIR"
 mkdir -p logs
 
 # --- Modules ---
+# Stock pytorch: uses bundled NCCL, no ncclx, no shim
 module load pytorch/2.8.0
-module load nccl
-module load cudatoolkit/12.4
-module load PrgEnv-gnu
-module load cray-mpich
-module load craype-accel-nvidia80
 
 # Activate venv if present
 if [ -d "$SCRIPT_DIR/../.venv" ]; then
     source "$SCRIPT_DIR/../.venv/bin/activate"
 fi
 
+# --- No LD_PRELOAD: stock NCCL from pytorch module, no shim ---
+unset LD_PRELOAD
+
+# --- Sparse comm flags (dense baseline — all sparse ops disabled) ---
+export USE_SPARSE_RS=0
+export USE_SPARSE_AR=0
+export AXONN_PRUNE_RS=0
+export AXONN_PRUNE_AR=0
+export SPARSE_COMMS_LOG_SPARSITY=1
+
 # --- NCCL / Libfabric (Perlmutter Slingshot-11) ---
-export LD_PRELOAD=/pscratch/sd/e/egencer/sparsecomms/torchcomms-sparse/build/ncclx/lib/libnccl.so.2
 export NCCL_DEBUG=INFO
 export NCCL_DEBUG_SUBSYS=INIT,NET
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export CUDA_VISIBLE_DEVICES=3,2,1,0
-unset SLURM_MPI_TYPE
 export NCCL_NET="AWS Libfabric"
 export NCCL_NET_GDR_LEVEL=PHB
 export NCCL_CROSS_NIC=1
@@ -58,21 +62,12 @@ export FI_CXI_RDZV_THRESHOLD=0
 export FI_CXI_RDZV_GET_MIN=0
 export FI_CXI_RDZV_EAGER_SIZE=0
 export FI_CXI_OPTIMIZED_MRS=0
-export FI_CXI_DISABLE_HMEM_DEV_REGISTER=1
-export FI_CXI_OFLOW_BUF_SIZE=1073741824
-export FI_CXI_OFLOW_BUF_COUNT=1
 export MPICH_GPU_SUPPORT_ENABLED=1
 export MPICH_GPU_ALLREDUCE_USE_KERNEL=1
 export MPICH_OFI_NIC_POLICY="USER"
 export MPICH_OFI_NIC_MAPPING="0:3; 1:2; 2:1; 3:0"
-export OMP_NUM_THREADS=8
-# --- CCD sparse collective flags (adaptive_spop, FORMAT_MASK=5) ---
-export NCCL_BUFFSIZE=16777216
-export NCCL_CCD_FORMAT_MASK=5
-export NCCL_CCD_DENSE_THRESHOLD=0.6
-export NCCL_CCD_DENSE_INTRA_THRESHOLD=0.7
-export NCCL_MIN_NCHANNELS=64
-export NCCL_MAX_NCHANNELS=64
+
+# --- No sparse/CCD flags: let NCCL auto-tune channels and use default buffers ---
 
 # --- Distributed ---
 NNODES=$SLURM_JOB_NUM_NODES
@@ -102,15 +97,12 @@ case $MODEL in
 esac
 
 # --- Parallelism config ---
-# fsdp:    Gc=1, Gr=1, Gd=4*N  — pure depth across all GPUs
-# fsdp_tp: Gc=2, Gr=2, Gd=N    — 2x2 intra-node NVLink TP + inter-node depth
 case $MODE in
   fsdp)    CTP=1; RTP=1; DTP=$GPUS ;;
   fsdp_tp) CTP=2; RTP=2; DTP=$NNODES ;;
   *) echo "Unknown mode $MODE (use fsdp or fsdp_tp)"; exit 1 ;;
 esac
 
-# mbs must be divisible by dtp (AxoNN drop() shards batch across depth group)
 if (( GBS % DTP != 0 )); then
   echo "ERROR: GBS=$GBS not divisible by DTP=$DTP. Minimum GBS for this config: $DTP"
   exit 1
@@ -121,7 +113,7 @@ echo "=================================================="
 echo "SLURM job:   $SLURM_JOB_ID"
 echo "Model:       $MODEL  (layers=$NUM_LAYERS hidden=$HIDDEN_SIZE heads=$NUM_HEADS)"
 echo "Mode:        $MODE  (Gc=$CTP Gr=$RTP Gd=$DTP)"
-echo "Sparsity:    $SPARSITY"
+echo "Sparsity:    $SPARSITY  [DENSE STOCK — no shim, stock NCCL]"
 echo "Nodes:       $NNODES  GPUs: $GPUS"
 echo "GBS=$GBS  MBS=$MBS  SEQ=$SEQ_LEN"
 echo "Iters:       $TRAIN_ITERS  Seed: $SEED"
@@ -172,7 +164,7 @@ DATA_ARGS="
     --split 949,50,1
 "
 
-TB_DIR="$SCRIPT_DIR/tensorboard/${SLURM_JOB_ID}_${MODEL}_${MODE}_sp${SPARSITY}_samp${SAMPLE_PCT}"
+TB_DIR="$SCRIPT_DIR/tensorboard/${SLURM_JOB_ID}_${MODEL}_${MODE}_dense_stock"
 mkdir -p "$TB_DIR"
 
 OUTPUT_ARGS="

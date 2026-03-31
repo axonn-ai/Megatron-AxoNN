@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN",
+    "command": "CC sanity_check.cpp -o sanity_check -I/opt/cray/pe/mpich/9.0.1/ofi/gnu/12.3/include -L/opt/cray/pe/mpich/9.0.1/ofi/gnu/12.3/lib -I../torchcomms-sparse/build/ncclx/include -L../torchcomms-sparse/build/ncclx/lib -lnccl -lmpi",
+    "file": "sanity_check.cpp"
+  }
+]

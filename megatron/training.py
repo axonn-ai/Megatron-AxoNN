@@ -46,80 +46,6 @@ from axonn import axonn as ax
 import axonn.intra_layer as ax_intra_layer
 
 
-class GradientPruner:
-    """
-    Top-K magnitude pruning with error feedback, applied after
-    optimizer.reduce_model_grads() and before optimizer.step().
-
-    Operates on param.main_grad (Megatron's bf16/fp32 gradient buffer).
-    Each depth-parallel rank prunes its own weight shard independently —
-    equivalent to global pruning since shards are disjoint.
-
-    Enable with --grad-sparsity S (e.g. 0.9 to keep top 10%).
-    Use --grad-sample-pct P < 100 for approximate (faster) threshold.
-    """
-
-    def __init__(self, sparsity: float, sample_pct: float = 100.0):
-        assert 0.0 <= sparsity < 1.0
-        assert 0.0 < sample_pct <= 100.0
-        self.sparsity = sparsity
-        self.sample_pct = sample_pct
-        self._error: dict[int, torch.Tensor] = {}
-
-    @torch.no_grad()
-    def step(self, model_chunks: list) -> dict:
-        """
-        model_chunks: the list of model partitions from train_step.
-        Returns a stats dict (sparsity_actual, nnz, total).
-        """
-        if self.sparsity == 0.0:
-            return {"sparsity_actual": 0.0, "nnz": -1, "total": -1}
-
-        samples = []
-        params_with_grad = []
-
-        for chunk in model_chunks:
-            for param in chunk.parameters():
-                g = getattr(param, "main_grad", None)
-                if g is None:
-                    g = param.grad
-                if g is None:
-                    continue
-                key = param.data_ptr()
-                if key in self._error:
-                    g.add_(self._error[key])
-                flat_abs = g.abs().flatten()
-                n = flat_abs.numel()
-                if self.sample_pct < 100.0:
-                    n_sample = max(1, int(n * self.sample_pct / 100.0))
-                    idx = torch.randint(0, n, (n_sample,), device=g.device)
-                    samples.append(flat_abs[idx])
-                else:
-                    samples.append(flat_abs)
-                params_with_grad.append((key, g))
-
-        if not params_with_grad:
-            return {"sparsity_actual": 0.0, "nnz": 0, "total": 0}
-
-        all_samples = torch.cat(samples)
-        k = min(max(1, int(all_samples.numel() * self.sparsity)), all_samples.numel())
-        threshold = torch.kthvalue(all_samples, k)[0]
-
-        nnz = total = 0
-        for key, g in params_with_grad:
-            mask = g.abs() > threshold
-            self._error[key] = g.mul(~mask)
-            g.mul_(mask)
-            nnz += mask.sum().item()
-            total += g.numel()
-
-        actual_sparsity = 1.0 - (nnz / total) if total > 0 else 0.0
-        return {"sparsity_actual": actual_sparsity, "nnz": nnz, "total": total}
-
-    def clear_error(self):
-        self._error.clear()
-
-
 def print_datetime(string):
     """Note that this call will sync across all ranks."""
     torch.distributed.barrier()
@@ -184,12 +110,6 @@ def pretrain(train_valid_test_dataset_provider,
 
     args = get_args()
     timers = get_timers()
-
-    # Gradient pruner (depth-parallel / FSDP-equivalent sparsity experiment).
-    args._grad_pruner = (
-        GradientPruner(args.grad_sparsity, args.grad_sample_pct)
-        if args.grad_sparsity > 0.0 else None
-    )
 
     # Model, optimizer, and learning rate.
     timers('model-and-optimizer-setup', log_level=0).start(barrier=True)
@@ -524,10 +444,6 @@ def train_step(forward_step_func, data_iterator,
     # Reduce gradients.
     optimizer.reduce_model_grads(args, timers)
 
-    # Gradient pruning (after all-reduce, before optimizer clips and steps).
-    if args.grad_sparsity > 0.0:
-        args._grad_pruner_stats = args._grad_pruner.step(model)
-
     # Vision gradients.
     if args.vision_pretraining and args.vision_pretraining_type == "dino":
         unwrapped_model = unwrap_model(model[0])
@@ -676,9 +592,6 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             writer.add_scalar('grad-norm', grad_norm, iteration)
             writer.add_scalar('grad-norm vs samples', grad_norm,
                               args.consumed_train_samples)
-        if args.grad_sparsity > 0.0 and hasattr(args, '_grad_pruner_stats'):
-            writer.add_scalar('grad-sparsity-actual',
-                              args._grad_pruner_stats['sparsity_actual'], iteration)
         if num_zeros_in_grad is not None:
             writer.add_scalar('num-zeros', num_zeros_in_grad, iteration)
             writer.add_scalar('num-zeros vs samples', num_zeros_in_grad,
@@ -735,10 +648,6 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
             log_string += ' num zeros: {:.1f} |'.format(num_zeros_in_grad)
         if params_norm is not None:
             log_string += ' params norm: {:.3f} |'.format(params_norm)
-        if args.grad_sparsity > 0.0 and hasattr(args, '_grad_pruner_stats'):
-            s = args._grad_pruner_stats
-            log_string += ' grad sparsity: {:.4f} (nnz {:d}/{:d}) |'.format(
-                s['sparsity_actual'], s['nnz'], s['total'])
         log_string += ' number of skipped iterations: {:3d} |'.format(
             total_loss_dict[skipped_iters_key])
         log_string += ' number of nan iterations: {:3d} |'.format(
