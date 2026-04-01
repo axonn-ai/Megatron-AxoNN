@@ -19,11 +19,11 @@ MODEL=1B         # 5B 10B 20B 40B 60B 80B 160B 320B 640B
 MODE=fsdp         # fsdp | fsdp_tp
 SPARSITY=.99      # 0.0 = baseline, 0.99 = 99% pruning
 SAMPLE_PCT=0.01   # % of grad elements sampled for threshold (100=exact, lower=faster/approx)
-GBS=128          # global batch size (must be divisible by DTP, see below)
+GBS=256         # global batch size (must be divisible by DTP, see below)
 SEQ_LEN=512
-TRAIN_ITERS=20
+TRAIN_ITERS=200
 SEED=42
-NCHANNELS=32  # pinned channel count for this sweep point
+NCHANNELS=64  # pinned channel count for this sweep point
 # ===========================================================================
 
 SCRIPT_DIR="/global/u1/e/egencer/scratch/sparsecomms/Megatron-AxoNN"
@@ -46,6 +46,7 @@ fi
 # --- Sparse comm flags ---
 export USE_SPARSE_RS=0
 export USE_SPARSE_AR=1
+export AXONN_PRUNE_TRITON=1
 export AXONN_PRUNE_RS=0
 export AXONN_PRUNE_AR=1
 export AXONN_PRUNE_SPARSITY=$SPARSITY

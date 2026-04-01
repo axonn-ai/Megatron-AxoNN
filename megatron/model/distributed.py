@@ -9,6 +9,7 @@ from typing import Dict, List
 import torch
 from axonn.sparse_comms import all_reduce_sparse
 from axonn.gradient_pruner import GradientPruner
+from axonn.triton_pruner import TritonGradientPruner
 
 # Lazy AR pruner — read env vars once on first bucket communication
 _ar_pruner = "uninitialized"
@@ -20,7 +21,10 @@ def _get_ar_pruner():
     if os.environ.get("AXONN_PRUNE_AR", "0") == "1":
         sparsity = float(os.environ.get("AXONN_PRUNE_SPARSITY", "0"))
         sample_pct = float(os.environ.get("AXONN_PRUNE_SAMPLE_PCT", "100.0"))
-        _ar_pruner = GradientPruner(sparsity, sample_pct)
+        if os.environ.get("AXONN_PRUNE_TRITON", "0") == "1":
+            _ar_pruner = TritonGradientPruner(sparsity, sample_pct)
+        else:
+            _ar_pruner = GradientPruner(sparsity, sample_pct)
     else:
         _ar_pruner = None
     return _ar_pruner
