@@ -44,6 +44,10 @@ from megatron.model.vision.knn_monitor import compute_feature_bank
 import axonn
 from axonn import axonn as ax
 import axonn.intra_layer as ax_intra_layer
+from axonn.op_timers import TIMERS as _OP_TIMERS, flush_all_and_get_ms as _flush_op_timers
+
+# Per-log-interval accumulators for op timer ms (plain floats, not tensors).
+_op_timer_accum: dict = {}
 
 
 def print_datetime(string):
@@ -554,6 +558,11 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
         'optimizer-copy-main-to-model-params',
         'optimizer']
 
+    # Flush op timers every iteration (rotates event buffers; reads previous iter).
+    if _OP_TIMERS:
+        for name, ms in _flush_op_timers().items():
+            _op_timer_accum[name] = _op_timer_accum.get(name, 0.0) + ms
+
     # Calculate batch size.
     batch_size = args.micro_batch_size * args.data_parallel_size * \
         get_num_microbatches()
@@ -617,6 +626,10 @@ def training_log(loss_dict, total_loss_dict, learning_rate, iteration,
                 mem_stats["allocation.all.current"],
                 iteration,
             )
+        if _op_timer_accum:
+            for name, accum_ms in _op_timer_accum.items():
+                writer.add_scalar(f'{name}/it', accum_ms / total_iterations, iteration)
+            _op_timer_accum.clear()
 
     if iteration % args.log_interval == 0:
         elapsed_time = timers('interval-time').elapsed(barrier=True)
