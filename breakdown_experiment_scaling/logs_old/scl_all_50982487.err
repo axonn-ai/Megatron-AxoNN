@@ -1,0 +1,592 @@
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+W0404 01:05:19.398342 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:19.398330 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:19.400059 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:19.400069 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:19.400075 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:19.400081 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:19.398336 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:19.400071 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:19.400079 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:19.400085 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:19.400090 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:19.400097 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:19.400065 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:19.400073 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:19.400079 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:19.400084 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:19.400090 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:19.400095 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:19.400100 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:19.400106 419378 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+W0404 01:05:19.400087 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:19.400092 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:19.400101 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:19.400107 419380 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+W0404 01:05:19.400102 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:19.400108 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:19.400114 419376 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+I0404 01:05:19.443531 419376 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:19.443546 419376 CudaWrap.cc:269] CUDART_VERSION 12090
+I0404 01:05:19.443532 419378 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:19.443545 419378 CudaWrap.cc:269] CUDART_VERSION 12090
+I0404 01:05:19.443537 419380 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:19.443549 419380 CudaWrap.cc:269] CUDART_VERSION 12090
+I0404 01:05:19.938523 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:19.943477 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:19.946308 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:19.988932 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:19.988993 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:19.998995 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:20.005980 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:20.006387 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:20.012286 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank2]:[W404 01:05:20.615274401 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 2]  using GPU 2 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+[rank3]:[W404 01:05:20.615290633 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 3]  using GPU 3 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+[rank1]:[W404 01:05:20.615342233 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 1]  using GPU 1 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+W0404 01:05:23.088496 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:23.088561 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:23.088567 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:23.088572 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:23.088577 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:23.088583 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:23.088587 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:23.088592 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:23.088597 419375 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+I0404 01:05:23.129175 419375 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:23.129188 419375 CudaWrap.cc:269] CUDART_VERSION 12090
+W0404 01:05:23.272610 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:23.274013 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:23.272602 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:23.274016 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:23.274025 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:23.274031 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:23.272614 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:23.274032 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:23.274022 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:23.274028 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:23.274034 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:23.274041 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:23.274046 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:23.274051 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:23.274036 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:23.274044 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:23.274049 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:23.274054 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:23.274061 2233047 nccl_cvars.cc:273] [CudaDev: 2] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+W0404 01:05:23.274052 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:23.274058 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:23.274064 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:23.274072 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:23.274078 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:23.274059 2233045 nccl_cvars.cc:273] [CudaDev: 1] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+W0404 01:05:23.274083 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:23.274090 2233044 nccl_cvars.cc:273] [CudaDev: 0] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+I0404 01:05:23.310049 2233045 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:23.310045 2233047 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:23.310059 2233047 CudaWrap.cc:269] CUDART_VERSION 12090
+I0404 01:05:23.310067 2233045 CudaWrap.cc:269] CUDART_VERSION 12090
+I0404 01:05:23.311408 2233044 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:23.311424 2233044 CudaWrap.cc:269] CUDART_VERSION 12090
+I0404 01:05:23.423567 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.458660 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.470381 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.782801 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.786189 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.786351 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.798366 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.806500 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.806663 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.815354 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.820101 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:23.820223 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank6]:[W404 01:05:23.497179918 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 6]  using GPU 2 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+[rank4]:[W404 01:05:23.497202111 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 4]  using GPU 0 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+[rank5]:[W404 01:05:23.497222802 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 5]  using GPU 1 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+W0404 01:05:24.066208 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_INTRA_THRESHOLD in the NCCL namespace
+W0404 01:05:24.066283 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_DENSE_THRESHOLD in the NCCL namespace
+W0404 01:05:24.066289 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_CHANNELS in the NCCL namespace
+W0404 01:05:24.066295 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_CCD_FORMAT_MASK in the NCCL namespace
+W0404 01:05:24.066300 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_VERSION in the NCCL namespace
+W0404 01:05:24.066307 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_TIMING in the NCCL namespace
+W0404 01:05:24.066312 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_DIR in the NCCL namespace
+W0404 01:05:24.066317 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_HOME in the NCCL namespace
+W0404 01:05:24.066323 2233049 nccl_cvars.cc:273] [CudaDev: 3] NCCL WARN CVAR: Unknown env NCCL_RS_SHIM_STATS in the NCCL namespace
+I0404 01:05:24.078670 2233049 CudaWrap.cc:267] cudaDriverVersion 13000
+I0404 01:05:24.078682 2233049 CudaWrap.cc:269] CUDART_VERSION 12090
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank0]:[W404 01:05:24.674745077 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+I0404 01:05:24.362983 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.401028 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.415087 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py:4807: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+[rank7]:[W404 01:05:24.087384442 ProcessGroupNCCL.cpp:5023] [PG ID 0 PG GUID 0 Rank 7]  using GPU 3 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can specify device_id in init_process_group() to force use of a particular device.
+CCD CHAN: pre-double nCh=4 nRanks=8 nNodes=2
+CCD CHAN: post-double nCh=8
+CCD CHAN: after MIN/MAX nCh=8
+I0404 01:05:24.537264 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.537246 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.537271 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.537284 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.600944 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.600914 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.600932 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:24.600908 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+[rank1]:[W404 01:05:25.403640113 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank4]:[W404 01:05:25.470716971 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank2]:[W404 01:05:25.403633851 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank5]:[W404 01:05:25.470720207 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank3]:[W404 01:05:25.403641656 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank6]:[W404 01:05:25.470724405 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank0]:[W404 01:05:25.403689449 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+[rank7]:[W404 01:05:25.470711440 init.cpp:772] Warning: nvfuser is no longer supported in torch script, use _jit_set_nvfuser_enabled is deprecated and a no-op (function operator())
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/training.py:107: UserWarning: The torch.cuda.*DtypeTensor constructors are no longer recommended. It's best to use methods such as torch.tensor(data, dtype=*, device='cuda') to create tensors. (Triggered internally at /pytorch/torch/csrc/tensor/python_tensor.cpp:78.)
+  start_time_tensor = torch.cuda.DoubleTensor([_TRAIN_START_TIME])
+CCD CHAN: pre-double nCh=4 nRanks=8 nNodes=2
+CCD CHAN: post-double nCh=8
+CCD CHAN: after MIN/MAX nCh=8
+I0404 01:05:28.063005 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.063011 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.063045 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.063043 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.090965 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.090971 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.090961 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:28.090982 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303298 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303369 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303340 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303440 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303655 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303723 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.303905 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.304265 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.341456 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.341671 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.341776 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.341921 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.342856 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.343049 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.345543 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:29.345655 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+/global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/distributed/c10d_logger.py:81: FutureWarning: `torch.distributed._all_gather_base` is a private function and will be deprecated. Please use `torch.distributed.all_gather_into_tensor` instead.
+  return func(*args, **kwargs)
+I0404 01:05:32.056085 2233049 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.059693 2233047 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.059895 2233045 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.060069 2233044 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.075727 419376 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.076345 419380 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.077571 419375 CommStateX.cc:297] CommStateX: set rankTopology with system
+I0404 01:05:32.077619 419378 CommStateX.cc:297] CommStateX: set rankTopology with system
+[rank4]:[W404 01:13:31.069880800 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank0]:[W404 01:13:31.084933239 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank7]:[W404 01:13:31.509854456 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank1]:[W404 01:13:31.450949422 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank3]:[W404 01:13:31.450930415 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank2]:[W404 01:13:31.452645749 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank5]:[W404 01:13:31.526129580 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[rank6]:[W404 01:13:32.677625703 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+Zarr-based strategies will not be registered because of missing packages
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:86: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/axonn/axonn/intra_layer/fully_connected.py:139: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:235: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:246: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:306: FutureWarning: `torch.cuda.amp.custom_fwd(args...)` is deprecated. Please use `torch.amp.custom_fwd(args..., device_type='cuda')` instead.
+  @custom_fwd
+/pscratch/sd/e/egencer/sparsecomms/Megatron-AxoNN/megatron/core/tensor_parallel/layers.py:343: FutureWarning: `torch.cuda.amp.custom_bwd(args...)` is deprecated. Please use `torch.amp.custom_bwd(args..., device_type='cuda')` instead.
+  @custom_bwd
+[E404 01:33:09.930840545 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:33:09.973382188 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=45269ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7efd37196eb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7efd938cb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7efd8eecb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7efd9393fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7efd9393ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7efd93940344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7efd938c3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7efd938ca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7efda2c0a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7efda2c40bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7efda23907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7efda238ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7efdb0a08e6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7efdb0a08f35 in /lib64/libc.so.6)
+
+[E404 01:33:48.305814387 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:33:48.306330395 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=82037ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7f9a108d9eb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7f99f46cb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7f99efccb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7f99f473fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7f99f473ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7f99f4740344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7f99f46c3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7f99f46ca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7f9a03a0a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7f9a03a40bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7f9a031907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7f9a0318ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7f9a1184ae6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7f9a1184af35 in /lib64/libc.so.6)
+
+[E404 01:33:53.633053671 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[E404 01:33:53.682613603 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:33:53.680785856 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=69632ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7f75b417eeb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7f7597ecb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7f75934cb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7f7597f3fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7f7597f3ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7f7597f40344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7f7597ec3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7f7597eca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7f75a720a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7f75a7240bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7f75a69907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7f75a698ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7f75b511de6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7f75b511df35 in /lib64/libc.so.6)
+
+[W404 01:33:53.683103030 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=38874ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7f412b796eb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7f4187ecb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7f41834cb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7f4187f3fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7f4187f3ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7f4187f40344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7f4187ec3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7f4187eca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7f419720a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7f4197240bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7f41969907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7f419698ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7f41a4fcfe6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7f41a4fcff35 in /lib64/libc.so.6)
+
+[E404 01:33:54.247757472 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:33:54.248184659 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=48635ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7effe257eeb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7effc62cb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7effc18cb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7effc633fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7effc633ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7effc6340344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7effc62c3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7effc62ca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7effd560a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7effd5640bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7effd4d907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7effd4d8ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7effe3558e6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7effe3558f35 in /lib64/libc.so.6)
+
+[E404 01:34:10.051267405 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:34:10.051668901 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=89368ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7f791eb7eeb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7f79028cb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7f78fdecb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7f790293fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7f790293ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7f7902940344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7f79028c3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7f79028ca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7f7911c0a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7f7911c40bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7f79113907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7f791138ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7f791fb1de6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7f791fb1df35 in /lib64/libc.so.6)
+
+[E404 01:34:10.697926653 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:34:10.698422963 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=31995ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7f2df9ed9eb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7f2dddccb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7f2dd92cb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7f2dddd3fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7f2dddd3ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7f2dddd40344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7f2dddcc3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7f2dddcca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7f2ded00a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7f2ded040bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7f2dec7907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7f2dec78ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7f2dfae83e6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7f2dfae83f35 in /lib64/libc.so.6)
+
+[E404 01:34:24.880617940 socket.cpp:1019] [c10d] The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+[W404 01:34:24.881191599 TCPStore.cpp:340] [c10d] TCP client failed to connect/validate to host nid001448:29500 - retrying (try=0, timeout=1200000ms, delay=49467ms): The client socket has timed out after 1200000ms while trying to connect to (nid001448, 29500).
+Exception raised from throwTimeoutError at /pytorch/torch/csrc/distributed/c10d/socket.cpp:1021 (most recent call first):
+frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) + 0x80 (0x7f4a6ab7eeb0 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libc10.so)
+frame #1: <unknown function> + 0x5d694f1 (0x7f4a4e8cb4f1 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #2: <unknown function> + 0x1369132 (0x7f4a49ecb132 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #3: <unknown function> + 0x5ddde0b (0x7f4a4e93fe0b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #4: <unknown function> + 0x5dddfab (0x7f4a4e93ffab in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #5: <unknown function> + 0x5dde344 (0x7f4a4e940344 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #6: <unknown function> + 0x5d61de3 (0x7f4a4e8c3de3 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #7: c10d::TCPStore::TCPStore(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, c10d::TCPStoreOptions const&) + 0x41d (0x7f4a4e8ca7ed in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_cpu.so)
+frame #8: <unknown function> + 0xbf05f5 (0x7f4a5dc0a5f5 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #9: <unknown function> + 0xc26bb6 (0x7f4a5dc40bb6 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #10: <unknown function> + 0x3767d2 (0x7f4a5d3907d2 in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+<omitting python frames>
+frame #17: <unknown function> + 0x374a2b (0x7f4a5d38ea2b in /global/common/software/nersc9/pytorch/2.8.0/lib/python3.12/site-packages/torch/lib/libtorch_python.so)
+frame #28: <unknown function> + 0x40e6c (0x7f4a6bb8ee6c in /lib64/libc.so.6)
+frame #29: __libc_start_main + 0x87 (0x7f4a6bb8ef35 in /lib64/libc.so.6)
+
+[2026-04-04T08:49:24.843] error: *** STEP 50982487.1 ON nid001452 CANCELLED AT 2026-04-04T08:49:24 DUE to SIGNAL Terminated ***
+[2026-04-04T08:49:24.845] error: *** JOB 50982487 ON nid001448 CANCELLED AT 2026-04-04T08:49:24 DUE to SIGNAL Terminated ***
