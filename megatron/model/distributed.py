@@ -10,6 +10,7 @@ import torch
 from axonn.sparse_comms import all_reduce_sparse
 from axonn.gradient_pruner import GradientPruner
 from axonn.triton_pruner import TritonGradientPruner
+from axonn.op_timers import TIMERS as _OP_TIMERS
 
 # Lazy AR pruner — read env vars once on first bucket communication
 _ar_pruner = "uninitialized"
@@ -121,9 +122,11 @@ class Bucket:
         else:
             pruner = _get_ar_pruner()
             if pruner is not None:
-                pruner.prune(self.data, key=self.data.data_ptr())
+                pruner.prune(self.data, key=self.data.data_ptr(),
+                             timer=_OP_TIMERS.get("dp_prune_timer"))
             self.communication_handle = all_reduce_sparse(
-                self.data, group=self.data_parallel_group, async_op=self.overlap_grad_reduce
+                self.data, group=self.data_parallel_group, async_op=self.overlap_grad_reduce,
+                timer=_OP_TIMERS.get("allreduce_timer"),
             )
         self.communication_issued = True
 
