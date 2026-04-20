@@ -15,11 +15,11 @@ set -euo pipefail
 # ===========================================================================
 # Experiment config — edit these before submitting
 # ===========================================================================
-MODEL=1B         # 5B 10B 20B 40B 60B 80B 160B 320B 640B
+MODEL=1B          # 5B 10B 20B 40B 60B 80B 160B 320B 640B
 MODE=fsdp         # fsdp | fsdp_tp
-SPARSITY=.99      # 0.0 = baseline, 0.99 = 99% pruning
-SAMPLE_PCT=0.01   # % of grad elements sampled for threshold (100=exact, lower=faster/approx)
-GBS=256         # global batch size (must be divisible by DTP, see below)
+SPARSITY=0.995      # 0.0 = baseline, 0.99 = 99% pruning
+SAMPLE_PCT=0.1   # % of grad elements sampled for threshold (100=exact, lower=faster/approx)
+GBS=512           # global batch size (must be divisible by DTP, see below)
 SEQ_LEN=512
 TRAIN_ITERS=200
 SEED=42
@@ -47,6 +47,7 @@ fi
 export USE_SPARSE_RS=0
 export USE_SPARSE_AR=1
 export AXONN_PRUNE_TRITON=1
+export AXONN_PRUNE_ERROR_ACCUMULATE=0
 export AXONN_PRUNE_RS=0
 export AXONN_PRUNE_AR=1
 export AXONN_PRUNE_SPARSITY=$SPARSITY
@@ -143,14 +144,25 @@ if (( GBS % DTP != 0 )); then
 fi
 MBS=$(( GBS / $GPUS ))
 
+TB_DIR="$SCRIPT_DIR/tensorboard/${SLURM_JOB_ID}_sp${SPARSITY}_samp${SAMPLE_PCT}_ch${NCHANNELS}_srs${USE_SPARSE_RS}sar${USE_SPARSE_AR}_prs${AXONN_PRUNE_RS}par${AXONN_PRUNE_AR}tri${AXONN_PRUNE_TRITON}_ea${AXONN_PRUNE_ERROR_ACCUMULATE}_buf${NCCL_BUFFSIZE}_fmt${NCCL_CCD_FORMAT_MASK}"
+
+
 echo "=================================================="
-echo "SLURM job:   $SLURM_JOB_ID"
-echo "Model:       $MODEL  (layers=$NUM_LAYERS hidden=$HIDDEN_SIZE heads=$NUM_HEADS)"
-echo "Mode:        $MODE  (Gc=$CTP Gr=$RTP Gd=$DTP)"
-echo "Sparsity:    $SPARSITY"
-echo "Nodes:       $NNODES  GPUs: $GPUS"
-echo "GBS=$GBS  MBS=$MBS  SEQ=$SEQ_LEN"
-echo "Iters:       $TRAIN_ITERS  Seed: $SEED"
+echo "SLURM job:      $SLURM_JOB_ID"
+echo "Model:          $MODEL  (layers=$NUM_LAYERS  hidden=$HIDDEN_SIZE  heads=$NUM_HEADS)"
+echo "Mode:           $MODE  (Gc=$CTP  Gr=$RTP  Gd=$DTP)"
+echo "Nodes:          $NNODES  GPUs: $GPUS"
+echo "GBS=$GBS  MBS=$MBS  SEQ=$SEQ_LEN  Iters=$TRAIN_ITERS  Seed=$SEED"
+echo "--- Sparse flags ---"
+echo "Sparsity=$SPARSITY  SamplePct=$SAMPLE_PCT"
+echo "USE_SPARSE_RS=$USE_SPARSE_RS  USE_SPARSE_AR=$USE_SPARSE_AR"
+echo "AXONN_PRUNE_RS=$AXONN_PRUNE_RS  AXONN_PRUNE_AR=$AXONN_PRUNE_AR  AXONN_PRUNE_TRITON=$AXONN_PRUNE_TRITON  AXONN_PRUNE_ERROR_ACCUMULATE=$AXONN_PRUNE_ERROR_ACCUMULATE"
+echo "--- NCCL CCD flags ---"
+echo "NCHANNELS=$NCHANNELS  NCCL_MAX_NCHANNELS=$NCCL_MAX_NCHANNELS"
+echo "NCCL_BUFFSIZE=$NCCL_BUFFSIZE"
+echo "NCCL_CCD_FORMAT_MASK=$NCCL_CCD_FORMAT_MASK"
+echo "NCCL_CCD_DENSE_THRESHOLD=$NCCL_CCD_DENSE_THRESHOLD  NCCL_CCD_DENSE_INTRA_THRESHOLD=$NCCL_CCD_DENSE_INTRA_THRESHOLD"
+echo "TB_DIR=$TB_DIR"
 echo "=================================================="
 
 GPT_ARGS="
@@ -198,7 +210,6 @@ DATA_ARGS="
     --split 949,50,1
 "
 
-TB_DIR="$SCRIPT_DIR/tensorboard/${SLURM_JOB_ID}_${MODEL}_${MODE}_sp${SPARSITY}_samp${SAMPLE_PCT}"
 mkdir -p "$TB_DIR"
 
 OUTPUT_ARGS="

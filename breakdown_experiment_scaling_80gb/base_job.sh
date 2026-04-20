@@ -12,7 +12,7 @@ set -euo pipefail
 # Experiment config — shared across all runs
 # GBS is computed dynamically below as 2 * GPUS (MBS=2 per GPU)
 # ===========================================================================
-MODEL=4B
+MODEL=3.3B
 MODE=fsdp
 SPARSITY=0.99
 SAMPLE_PCT=0.1
@@ -22,14 +22,14 @@ SEED=42
 NCHANNELS=64
 # ===========================================================================
 
-SCRIPT_DIR="/global/u1/e/egencer/scratch/sparsecomms/Megatron-AxoNN"
-cd "$SCRIPT_DIR"
+: "${MEGATRON_HOME:?Set MEGATRON_HOME to Megatron-AxoNN root}"
+cd "$MEGATRON_HOME"
 mkdir -p logs
 
 module load pytorch/2.8.0
 
-if [ -d "$SCRIPT_DIR/../.venv" ]; then
-    source "$SCRIPT_DIR/../.venv/bin/activate"
+if [ -d "$MEGATRON_HOME/../.venv" ]; then
+    source "$MEGATRON_HOME/../.venv/bin/activate"
 fi
 
 # --- Sparse comm flags (derived from DO_PRUNE / DO_ERROR_ACCUM / DO_BREAKDOWN) ---
@@ -59,7 +59,8 @@ export NCCL_RS_SHIM_TIMING=0
 export NCCL_RS_SHIM_STATS=0
 
 # --- NCCL / Libfabric ---
-export LD_PRELOAD="/pscratch/sd/e/egencer/sparsecomms/torchcomms-sparse/build/ncclx/lib/libnccl.so.2"
+: "${TORCHCOMMS_SPARSE_HOME:?Set TORCHCOMMS_SPARSE_HOME to torchcomms-sparse root}"
+export LD_PRELOAD="$TORCHCOMMS_SPARSE_HOME/build/ncclx/lib/libnccl.so.2"
 export NCCL_DEBUG=INFO
 export NCCL_DEBUG_SUBSYS=INIT,NET
 export CUDA_DEVICE_MAX_CONNECTIONS=1
@@ -95,24 +96,14 @@ export MASTER_PORT=29500
 export WORLD_SIZE=$GPUS
 
 # --- Data ---
-DATA_DIR="$SCRATCH/sparsecomms/gpt_data"
+: "${DATA_DIR:?Set DATA_DIR to gpt_data directory}"
 VOCAB_FILE="$DATA_DIR/gpt2-vocab.json"
 MERGE_FILE="$DATA_DIR/gpt2-merges.txt"
 DATA_PATH="$DATA_DIR/BookCorpusDataset_text_document"
 
 # --- Model architecture ---
 case $MODEL in
-  125M)  NUM_LAYERS=12;  HIDDEN_SIZE=768;   NUM_HEADS=12  ;;
-  350M)  NUM_LAYERS=24;  HIDDEN_SIZE=1024;  NUM_HEADS=16  ;;
-  760M)  NUM_LAYERS=24;  HIDDEN_SIZE=1536;  NUM_HEADS=16  ;;
-  1B)    NUM_LAYERS=24;  HIDDEN_SIZE=2048;  NUM_HEADS=32  ;;
-  1BH)   NUM_LAYERS=31;  HIDDEN_SIZE=2048;  NUM_HEADS=32  ;;
-  4B)    NUM_LAYERS=28;  HIDDEN_SIZE=3072;  NUM_HEADS=24  ;;
-  2s7B)    NUM_LAYERS=32;  HIDDEN_SIZE=2560;  NUM_HEADS=32  ;;
-  2B)    NUM_LAYERS=32;  HIDDEN_SIZE=2560;  NUM_HEADS=32  ;;
-  6B)    NUM_LAYERS=32;  HIDDEN_SIZE=4096;  NUM_HEADS=32  ;;
-  5B)    NUM_LAYERS=18;  HIDDEN_SIZE=4096;  NUM_HEADS=32  ;;
-  10B)   NUM_LAYERS=32;  HIDDEN_SIZE=5120;  NUM_HEADS=40  ;;
+  3.3B)  NUM_LAYERS=28;  HIDDEN_SIZE=3072;  NUM_HEADS=24  ;;
   *) echo "Unknown model $MODEL"; exit 1 ;;
 esac
 
@@ -128,7 +119,7 @@ if (( GBS % DTP != 0 )); then
 fi
 MBS=$(( GBS / GPUS ))
 
-TB_DIR="$SCRIPT_DIR/tensorboard/${SLURM_JOB_ID}_${JOB_LABEL}_scaling"
+TB_DIR="$MEGATRON_HOME/tensorboard/${SLURM_JOB_ID}_${JOB_LABEL}_scaling"
 
 echo "=================================================="
 echo "SLURM job:      $SLURM_JOB_ID  label=$JOB_LABEL"
